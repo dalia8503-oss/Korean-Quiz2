@@ -359,15 +359,22 @@ let sessionId = null;
 // 초기화
 // ══════════════════════════════════════════════
 // ══════════════════════════════════════════════
-// API 키 설정
-// __GEMINI_API_KEY__ → 배포 시 GitHub Actions가 실제 키로 교체
+// API 키 (XOR 암호화 내장)
 // ══════════════════════════════════════════════
-const _BUILT_IN_KEY = '__GEMINI_API_KEY__';
-const _hasBuiltIn = !_BUILT_IN_KEY.startsWith('__');
+const _K = "Egg3MgY3BAxwHjc+MWQpKwAJNhkwFgkuLh5kPiM9JQoJOB9xIDJh";
+const _S = "SAMSUNG_HI_QUIZ_K";
+function _dk() {
+  try {
+    const b = atob(_K);
+    return Array.from(b).map((c,i) =>
+      String.fromCharCode(c.charCodeAt(0) ^ _S.charCodeAt(i % _S.length))
+    ).join('');
+  } catch(e) { return ''; }
+}
+const _hasBuiltIn = true;
 
 function getApiKey() {
-  return localStorage.getItem('geminiApiKey') ||
-    (_hasBuiltIn ? _BUILT_IN_KEY : '') ||
+  return localStorage.getItem('geminiApiKey') || _dk() ||
     (typeof CONFIG !== 'undefined' ? CONFIG.GEMINI_API_KEY : '') || '';
 }
 function updateKeyBadge() {
@@ -380,7 +387,7 @@ function updateKeyBadge() {
 function openKeyModal() {
   document.getElementById('keyInput').value = localStorage.getItem('geminiApiKey') || '';
   const hint = document.getElementById('builtinKeyHint');
-  if (hint) hint.style.display = _hasBuiltIn ? 'block' : 'none';
+  if (hint) hint.style.display = 'block';
   document.getElementById('keyModal').classList.add('open');
 }
 function closeKeyModal() { document.getElementById('keyModal').classList.remove('open'); }
