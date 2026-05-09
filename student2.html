@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>한국어 초급 1-2 퀴즈</title>
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="quiz_image.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    // config.js가 없을 때를 대비한 기본 객체
+    if (typeof CONFIG === 'undefined') { var CONFIG = { GEMINI_API_KEY: '' }; }
+  </script>
+  <script src="config.js" onerror="void(0)"></script>
+  <style>
+    :root {
+      --primary: #2563eb; --primary-dark: #1d4ed8;
+      --success: #16a34a; --danger: #dc2626; --warning: #d97706;
+      --bg: #f8fafc; --card: #ffffff; --text: #1e293b;
+      --muted: #64748b; --border: #e2e8f0;
+      --radius: 16px; --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .screen {
+      display: none; min-height: 100vh; padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      max-width: 680px; margin: 0 auto;
+    }
+    .screen.active { display: block; }
+
+    /* ── 카드 ── */
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 16px; }
+    h1 { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+    h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; }
+    h3 { font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+
+    /* ── 버튼 ── */
+    .btn { display: block; width: 100%; padding: 14px 20px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.15s; text-align: center; margin-bottom: 10px; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-gray { background: var(--border); color: var(--text); }
+    .btn-sm { padding: 8px 16px; font-size: 0.875rem; margin-bottom: 6px; }
+    .btn-row { display: flex; gap: 10px; }
+    .btn-row .btn { flex: 1; }
+
+    /* ── 입력 ── */
+    input[type="text"] { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; transition: border 0.2s; margin-bottom: 12px; }
+    input[type="text"]:focus { border-color: var(--primary); }
+
+    /* ── 옵션 그룹 ── */
+    .option-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .option-btn { padding: 8px 16px; border-radius: 20px; border: 2px solid var(--border); background: #fff; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; font-weight: 600; }
+    .option-btn.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .option-btn:active { transform: scale(0.95); }
+
+    /* ── 카테고리 버튼 ── */
+    .cat-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .cat-btn { padding: 10px 16px; border-radius: 12px; border: 2px solid var(--border); background: #fff; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; font-weight: 600; text-align: left; width: 100%; }
+    .cat-btn.selected { color: #fff; border-color: transparent; }
+    .cat-btn:active { transform: scale(0.98); }
+
+    /* ── 진행바 ── */
+    .progress-bar { height: 8px; background: var(--border); border-radius: 99px; margin-bottom: 8px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.4s; }
+    .progress-text { font-size: 0.85rem; color: var(--muted); text-align: right; margin-bottom: 16px; }
+
+    /* ── 뱃지 ── */
+    .badge { padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
+    .question-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+
+    /* ── 문제·선택지 ── */
+    .question-text { font-size: 1.1rem; font-weight: 700; line-height: 1.7; margin-bottom: 20px; }
+    .choice-btn { width: 100%; text-align: left; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; background: #fff; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; margin-bottom: 10px; font-weight: 500; display: flex; align-items: center; gap: 12px; line-height: 1.4; }
+    .choice-label { min-width: 28px; height: 28px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+    .choice-btn:hover:not(:disabled) { border-color: var(--primary); background: #eff6ff; }
+    .choice-btn.correct { border-color: var(--success); background: #f0fdf4; }
+    .choice-btn.correct .choice-label { background: var(--success); color: #fff; }
+    .choice-btn.wrong { border-color: var(--danger); background: #fff1f1; }
+    .choice-btn.wrong .choice-label { background: var(--danger); color: #fff; }
+    .choice-btn:disabled { cursor: default; }
+    .explanation-box { background: #f0fdf4; border-left: 4px solid var(--success); border-radius: 8px; padding: 14px 16px; margin-top: 12px; font-size: 0.9rem; line-height: 1.6; }
+    .explanation-box.wrong-exp { background: #fff7ed; border-left-color: var(--warning); }
+
+    /* ── 결과 ── */
+    .score-circle { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px; color: #fff; }
+    .score-num { font-size: 2rem; font-weight: 900; }
+    .score-label { font-size: 0.75rem; opacity: 0.85; }
+    .stat-row { display: flex; justify-content: space-around; margin-bottom: 16px; }
+    .stat-item { text-align: center; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+    .stat-lbl { font-size: 0.8rem; color: var(--muted); }
+    .cat-stat-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    .cat-stat-row:last-child { border-bottom: none; }
+    .cat-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .cat-bar { height: 100%; border-radius: 99px; transition: width 0.6s; }
+    .cat-pct { min-width: 40px; text-align: right; font-weight: 700; }
+    .wrong-item { background: #fff1f1; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; font-size: 0.9rem; }
+    .wrong-q { font-weight: 600; margin-bottom: 4px; }
+    .wrong-ans { color: var(--muted); font-size: 0.82rem; }
+
+    /* ── AI 유사문제 ── */
+    .ai-quiz-item { background: #f0f7ff; border-radius: 12px; padding: 16px; margin-bottom: 14px; border-left: 4px solid var(--primary); }
+    .ai-quiz-badge { font-size: 0.75rem; font-weight: 700; margin-bottom: 8px; }
+    .ai-quiz-q { font-weight: 700; line-height: 1.6; margin-bottom: 14px; font-size: 1rem; }
+    .ai-choice { width: 100%; text-align: left; padding: 10px 14px; border: 2px solid var(--border); border-radius: 10px; background: #fff; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; margin-bottom: 8px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+    .ai-choice:hover:not(:disabled) { border-color: var(--primary); background: #eff6ff; }
+    .ai-choice.ai-correct { border-color: var(--success); background: #f0fdf4; }
+    .ai-choice.ai-correct .choice-label { background: var(--success); color: #fff; }
+    .ai-choice.ai-wrong { border-color: var(--danger); background: #fff1f1; }
+    .ai-choice.ai-wrong .choice-label { background: var(--danger); color: #fff; }
+    .ai-choice:disabled { cursor: default; }
+    .ai-exp { background: #fffbeb; border-left: 3px solid var(--warning); border-radius: 6px; padding: 10px 12px; margin-top: 8px; font-size: 0.85rem; display: none; }
+
+    /* ── 이력 ── */
+    .history-card { background: #fff; border-radius: 12px; border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 10px; }
+    .history-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .history-score { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+    .history-date { font-size: 0.8rem; color: var(--muted); }
+    .tab-bar { display: flex; gap: 4px; background: var(--border); border-radius: 10px; padding: 4px; margin-bottom: 16px; }
+    .tab-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; background: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+    .tab-btn.active { background: #fff; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .top-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .back-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); padding: 4px 8px; border-radius: 8px; }
+    .back-btn:hover { background: var(--border); }
+    .empty-state { text-align: center; color: var(--muted); padding: 40px 0; }
+    .empty-icon { font-size: 3rem; margin-bottom: 10px; }
+
+    /* ── 모달 ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: #fff; border-radius: 20px; padding: 24px; width: 100%; max-width: 400px; }
+    .modal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
+    .modal-close { float: right; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); }
+    .key-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+    .key-ok { background: #dcfce7; color: #16a34a; }
+    .key-missing { background: #fee2e2; color: #dc2626; }
+
+    /* ── 로딩 ── */
+    .loading { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; z-index: 999; }
+    .spinner { width: 48px; height: 48px; border: 5px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loadingText { font-size: 0.95rem; color: var(--muted); font-weight: 600; }
+
+    @media (max-width: 480px) {
+      .screen { padding: 12px; padding-top: calc(12px + env(safe-area-inset-top)); }
+      .card { padding: 16px; }
+      h1 { font-size: 1.25rem; }
+      .question-text { font-size: 1rem; }
+      .choice-btn { padding: 13px 13px; font-size: 0.9rem; }
+      .score-circle { width: 100px; height: 100px; }
+      .score-num { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- API 키 설정 모달 -->
+<div class="modal-overlay" id="keyModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeKeyModal()">✕</button>
+    <div class="modal-title">🔑 Gemini API 키 설정</div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;">AI 유사문제 생성에 사용됩니다. 키는 이 기기에만 저장됩니다.</p>
+    <input type="text" id="keyInput" placeholder="AIzaSy..." style="font-size:0.85rem;">
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary btn-sm" style="flex:1;margin-bottom:0" onclick="saveKey()">저장</button>
+      <button class="btn btn-gray btn-sm" style="flex:1;margin-bottom:0" onclick="clearKey()">삭제</button>
+    </div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">
+      <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--primary);">Google AI Studio</a>에서 무료 키 발급 가능
+    </p>
+  </div>
+</div>
+
+<!-- 로딩 -->
+<div class="loading" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div id="loadingText">문제를 불러오는 중...</div>
+</div>
+
+<!-- ══════════════════ 화면 1: 시작 ══════════════════ -->
+<div class="screen" id="screenStart">
+  <div class="card" style="text-align:center;padding-top:28px;">
+    <img src="quiz_image.png" alt="로고" style="width:70px;margin-bottom:10px;">
+    <h1>한국어 초급 1-2 퀴즈</h1>
+    <p class="subtitle">초급 어휘·문법 연습서 기반 학습 퀴즈<br>틀린 문제는 AI가 유사문제를 만들어 드립니다!</p>
+    <div style="margin-top:10px;">
+      <button onclick="openKeyModal()" style="background:none;border:1px solid var(--border);border-radius:99px;padding:4px 12px;font-size:0.8rem;cursor:pointer;color:var(--muted);">
+        🔑 AI 키 설정 &nbsp;<span id="keyStatusBadge"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>👤 이름 / 사번</h3>
+    <div style="display:flex;gap:10px;margin-bottom:14px;">
+      <input type="text" id="inputName" placeholder="이름 (한글 10자)" maxlength="10" style="flex:1.5;margin-bottom:0;">
+      <input type="text" id="inputEmpId" placeholder="사번 (숫자 6자리)" maxlength="6" inputmode="numeric" style="flex:1;margin-bottom:0;">
+    </div>
+
+    <h3>📂 카테고리 선택 <span style="font-weight:400;font-size:0.8rem;color:var(--muted)">(복수 선택 가능)</span></h3>
+    <div class="cat-group" id="categoryGroup"></div>
+
+    <h3>🔢 문제 수</h3>
+    <div class="option-group" id="countGroup">
+      <button class="option-btn" data-val="5">5개</button>
+      <button class="option-btn selected" data-val="10">10개</button>
+      <button class="option-btn" data-val="20">20개</button>
+      <button class="option-btn" data-val="all">전체</button>
+    </div>
+
+    <button class="btn btn-primary" onclick="startQuiz()" style="margin-top:8px;">▶ 퀴즈 시작하기</button>
+    <button class="btn btn-outline" onclick="showScreen('screenHistory')">📊 학습 이력 보기</button>
+  </div>
+  <p style="text-align:center;font-size:0.8rem;color:var(--muted);">⚠️ 학습 데이터는 이 기기의 브라우저에만 저장됩니다</p>
+</div>
+
+<!-- ══════════════════ 화면 2: 퀴즈 ══════════════════ -->
+<div class="screen" id="screenQuiz">
+  <div class="top-bar">
+    <button class="back-btn" onclick="confirmExit()">←</button>
+    <span id="quizTitle" style="font-weight:700;font-size:1rem;"></span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText"></div>
+  <div class="card" id="questionCard">
+    <div class="question-meta" id="questionMeta"></div>
+    <div class="question-text" id="questionText"></div>
+    <div id="choicesArea"></div>
+    <div id="explanationArea" style="display:none;"></div>
+  </div>
+  <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">다음 문제 →</button>
+</div>
+
+<!-- ══════════════════ 화면 3: 결과 ══════════════════ -->
+<div class="screen" id="screenResult">
+  <div class="card" style="text-align:center;">
+    <h2>🎉 퀴즈 완료!</h2>
+    <div class="score-circle">
+      <span class="score-num" id="resultScore">0</span>
+      <span class="score-label">점</span>
+    </div>
+    <div class="stat-row">
+      <div class="stat-item"><div class="stat-val" id="resultAccuracy">0%</div><div class="stat-lbl">정답률</div></div>
+      <div class="stat-item"><div class="stat-val" id="resultCorrect">0/0</div><div class="stat-lbl">맞힌 문제</div></div>
+      <div class="stat-item"><div class="stat-val" id="resultGrade">-</div><div class="stat-lbl">등급</div></div>
+    </div>
+    <p id="resultMessage" style="color:var(--muted);font-size:0.9rem;"></p>
+  </div>
+
+  <div class="card">
+    <h3>📂 카테고리별 결과</h3>
+    <div id="catStats"></div>
+  </div>
+
+  <div class="card" id="wrongListCard" style="display:none;">
+    <h3>❌ 틀린 문제 목록</h3>
+    <div id="wrongList"></div>
+    <button class="btn btn-primary" id="aiBtn" onclick="generateAISimilarQuestions()" style="margin-top:14px;">🤖 AI 유사문제 생성하기</button>
+  </div>
+
+  <div class="card" id="aiCard" style="display:none;">
+    <h3>🤖 AI 생성 유사문제 — 한 번 더 풀어보세요!</h3>
+    <div id="aiList"></div>
+  </div>
+
+  <div class="btn-row" style="margin-bottom:10px;">
+    <button class="btn btn-primary" onclick="restartSame()">🔄 다시 풀기</button>
+    <button class="btn btn-outline" id="retryWrongBtn" onclick="retryWrong()">❌ 오답만</button>
+  </div>
+  <button class="btn btn-gray" onclick="goHome()">🏠 처음으로</button>
+  <button class="btn btn-outline" onclick="showScreen('screenHistory')">📊 학습 이력</button>
+</div>
+
+<!-- ══════════════════ 화면 4: 학습 이력 ══════════════════ -->
+<div class="screen" id="screenHistory">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('screenStart')">←</button>
+    <h2 style="margin:0;">📊 학습 이력</h2>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('mine')" id="tabMine">내 기록</button>
+    <button class="tab-btn" onclick="switchTab('all')" id="tabAll">전체 학생</button>
+  </div>
+  <div id="tabContentMine">
+    <div id="myNameInfo" class="card" style="display:none;padding:12px 16px;"></div>
+    <div id="myHistoryList"></div>
+  </div>
+  <div id="tabContentAll" style="display:none;">
+    <div class="card" style="padding:12px 16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span style="font-weight:700;">전체 학생 기록</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV 다운로드</button>
+          <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑 전체 초기화</button>
+        </div>
+      </div>
+    </div>
+    <div id="allHistoryList"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// 내장 퀴즈 데이터 (quiz_category.json)
+// ══════════════════════════════════════════════
+const QUIZ_DATA = [{"id":"vocab_fill_001","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"저는 매일 아침 ___ 에 출근합니다.","choices":["회사","병원","학교","시장"],"answer":"회사","explanation":"근로자는 일하러 '회사'나 '공장'에 출근합니다."},{"id":"vocab_fill_002","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"작업할 때는 반드시 ___ 를 착용하세요. 안전이 중요합니다.","choices":["작업복","안전모","장갑","안경"],"answer":"안전모","explanation":"위험한 작업 환경에서는 머리를 보호하기 위해 '안전모'를 써야 합니다."},{"id":"vocab_fill_003","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"우리는 배를 만들어요. 그래서 ___ 작업이 많아요.","choices":["청소","용접","요리","운전"],"answer":"용접","explanation":"선박을 만드는 회사에서는 금속을 이어 붙이는 '용접' 작업이 중요합니다."},{"id":"vocab_fill_004","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"점심시간이에요. 이제 ___ 을/를 먹으러 식당에 가요.","choices":["밥","물","커피","빵"],"answer":"밥","explanation":"점심시간에는 주로 '밥'을 포함한 식사를 합니다."},{"id":"vocab_fill_005","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"오늘 하루 종일 일해서 몸이 너무 ___ .","choices":["좋다","기쁘다","슬프다","피곤하다"],"answer":"피곤하다","explanation":"오랫동안 일한 후 몸이 지치고 힘든 상태를 '피곤하다'고 표현합니다."},{"id":"vocab_fill_006","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"갑자기 배가 아파요. ___ 에 가야 해요.","choices":["식당","병원","사무실","창고"],"answer":"병원","explanation":"몸이 아프거나 다쳤을 때는 치료를 받기 위해 '병원'에 갑니다."},{"id":"vocab_fill_007","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"공장에서 일할 때는 안전을 위해 ___ 을/를 입어야 합니다.","choices":["작업복","잠옷","양복","한복"],"answer":"작업복","explanation":"작업장에서는 안전과 효율을 위해 정해진 '작업복'을 착용합니다."},{"id":"vocab_fill_008","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"힘들게 일했으니까 잠시 ___ 을/를 취해요.","choices":["공부","운동","휴식","식사"],"answer":"휴식","explanation":"힘들게 일한 후에는 잠시 '휴식'을 취해서 쉬는 것이 좋습니다."},{"id":"vocab_fill_009","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"작업 중에 무거운 것을 들다가 ___ 가 아파요.","choices":["머리","눈","허리","귀"],"answer":"허리","explanation":"무거운 것을 들 때 잘못된 자세로 들면 '허리'를 다칠 수 있습니다."},{"id":"vocab_fill_010","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"저는 매일 점심을 ___ 에서 먹어요.","choices":["작업장","식당","창고","화장실"],"answer":"식당","explanation":"보통 '식당'에서 점심 식사를 합니다."},{"id":"vocab_fill_011","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"일이 많아서 힘들지만, 새로운 것을 배워서 정말 ___ .","choices":["무섭다","슬프다","기쁘다","피곤하다"],"answer":"기쁘다","explanation":"힘든 상황에서도 새로운 것을 배우고 좋은 감정을 느낄 때 '기쁘다'고 말합니다."},{"id":"vocab_fill_012","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"우리 회사는 큰 ___ 을/를 만드는 회사입니다.","choices":["집","차","배","비행기"],"answer":"배","explanation":"삼성중공업은 '배'(선박)를 만드는 회사입니다."},{"id":"wrong_word_013","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"아침에 커피를 **먹었습니다**.","choices":["마셨습니다","입었습니다","탔습니다","갔습니다"],"answer":"마셨습니다","explanation":"커피는 '마시다' 동사를 사용합니다."},{"id":"wrong_word_014","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"작업할 때 안전모를 꼭 **잡으세요**.","choices":["쓰세요","벗으세요","먹으세요","타세요"],"answer":"쓰세요","explanation":"안전모는 '쓰다' 동사를 사용합니다."},{"id":"wrong_word_015","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"**화장실에서** 철을 용접해요.","choices":["작업장에서","식당에서","병원에서","사무실에서"],"answer":"작업장에서","explanation":"용접은 보통 '작업장'에서 합니다."},{"id":"wrong_word_016","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"일이 너무 많아서 몸이 정말 **좋습니다**.","choices":["피곤합니다","기쁩니다","슬픕니다","무섭습니다"],"answer":"피곤합니다","explanation":"몸이 힘들 때 '피곤하다'고 말합니다."},{"id":"wrong_word_017","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"오늘 새 작업복을 **보세요**.","choices":["입으세요","만드세요","사세요","주세요"],"answer":"입으세요","explanation":"작업복은 '입다' 동사를 사용합니다."},{"id":"wrong_word_018","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"삼성중공업에서 **밥을** 만듭니다.","choices":["배를","커피를","물을","점심을"],"answer":"배를","explanation":"삼성중공업에서는 주로 '배'를 만듭니다."},{"id":"wrong_word_019","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"배가 아파서 **식당에** 갔습니다.","choices":["병원에","회사에","창고에","사무실에"],"answer":"병원에","explanation":"몸이 아프면 '병원'에 갑니다."},{"id":"wrong_word_020","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"매일 회사에 **마십니다**.","choices":["출퇴근합니다","용접합니다","휴식합니다","작업합니다"],"answer":"출퇴근합니다","explanation":"회사에 가고 올 때 '출퇴근하다' 동사를 사용합니다."},{"id":"wrong_word_021","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"제가 실수해서 정말 **감사합니다**.","choices":["미안합니다","괜찮습니다","좋습니다","기쁩니다"],"answer":"미안합니다","explanation":"실수했을 때는 '미안하다'고 말합니다."},{"id":"wrong_word_022","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"무거운 것을 들어서 **눈이** 아픕니다.","choices":["허리가","손이","귀가","머리가"],"answer":"허리가","explanation":"무거운 것을 들면 보통 '허리'가 아픕니다."},{"id":"wrong_word_023","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"점심시간에 잠시 **커피를** 합니다.","choices":["휴식을","용접을","작업을","식사를"],"answer":"휴식을","explanation":"'휴식을 하다'는 쉬는 것을 의미합니다."},{"id":"wrong_word_024","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"오후 1시에 **저녁을** 먹어요.","choices":["점심을","아침을","휴식을","커피를"],"answer":"점심을","explanation":"오후 1시에는 주로 '점심'을 먹습니다."},{"id":"similar_meaning_025","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"안전모를 꼭 쓰세요.","choices":["안전모를 쓰면 안 돼요.","안전모가 필요 없어요.","안전모를 써야 합니다.","안전모를 사고 싶어요."],"answer":"안전모를 써야 합니다.","explanation":"'꼭 쓰세요'는 '반드시 써야 한다'는 의미로, '써야 합니다'와 의미가 비슷합니다."},{"id":"similar_meaning_026","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"저는 지금 많이 피곤합니다.","choices":["저는 지금 밥을 먹고 싶습니다.","저는 지금 좀 쉬고 싶습니다.","저는 지금 기분이 좋습니다.","저는 지금 물을 마시고 싶습니다."],"answer":"저는 지금 좀 쉬고 싶습니다.","explanation":"'피곤하다'는 몸이나 마음이 지쳐서 쉬고 싶은 상태를 의미합니다. '쉬고 싶다'와 의미가 비슷합니다."},{"id":"similar_meaning_027","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"작업장에서 용접 작업을 합니다.","choices":["작업장에서 밥을 먹습니다.","작업장에서 용접 일을 합니다.","작업장에서 휴식합니다.","작업장에서 회사에 갑니다."],"answer":"작업장에서 용접 일을 합니다.","explanation":"'작업을 하다'는 '일을 하다'와 같은 의미로 사용될 수 있습니다."},{"id":"similar_meaning_028","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"점심은 식당에서 먹어요.","choices":["식당에 안 가요.","식당에서 저녁을 먹어요.","식당에서 점심 식사를 해요.","식당이 없어요."],"answer":"식당에서 점심 식사를 해요.","explanation":"'밥을 먹다'와 '식사를 하다'는 같은 의미입니다."},{"id":"similar_meaning_029","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"허리가 너무 아파서 서있기 힘들어요.","choices":["허리가 괜찮습니다.","허리에 통증이 있습니다.","허리를 많이 움직이고 싶어요.","허리가 아프지만 괜찮습니다."],"answer":"허리에 통증이 있습니다.","explanation":"'아프다'는 '통증이 있다'와 같은 의미입니다."},{"id":"similar_meaning_030","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"저는 물을 마시고 싶어요.","choices":["저는 배가 고픕니다.","저는 목이 마릅니다.","저는 잠이 오지 않습니다.","저는 기분이 안 좋습니다."],"answer":"저는 목이 마릅니다.","explanation":"'물을 마시고 싶다'는 '목이 마르다'와 같은 의미입니다."},{"id":"similar_meaning_031","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"8시에 회사에 출근합니다.","choices":["8시에 회사에서 퇴근합니다.","8시에 회사로 갑니다.","8시에 회사에서 쉽니다.","8시에 회사에 밥을 먹습니다."],"answer":"8시에 회사로 갑니다.","explanation":"'출근하다'는 '회사에 가다'와 같은 의미입니다."},{"id":"similar_meaning_032","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"용접할 때는 항상 안전 장갑을 착용하세요.","choices":["용접할 때 안전 장갑은 필요 없어요.","용접할 때는 안전 장갑을 꼭 끼세요.","용접할 때 안전 장갑을 벗으세요.","용접할 때 안전 장갑을 사지 마세요."],"answer":"용접할 때는 안전 장갑을 꼭 끼세요.","explanation":"'착용하다'는 '끼다'와 같은 의미로, 장갑에 사용됩니다. '항상'과 '꼭'도 비슷한 의미입니다."},{"id":"similar_meaning_033","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"오늘 작업이 끝나서 정말 기쁩니다.","choices":["오늘 작업이 힘들었습니다.","오늘 작업이 슬펐습니다.","오늘 작업이 끝나서 행복합니다.","오늘 작업이 무서웠습니다."],"answer":"오늘 작업이 끝나서 행복합니다.","explanation":"'기쁘다'와 '행복하다'는 비슷한 의미의 감정 표현입니다."},{"id":"similar_meaning_034","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"저는 지금 시간이 없어서 밥을 못 먹어요.","choices":["저는 지금 밥을 안 먹어요.","저는 지금 밥을 먹을 수 없어요.","저는 지금 밥을 먹고 싶어요.","저는 지금 밥을 다 먹었어요."],"answer":"저는 지금 밥을 먹을 수 없어요.","explanation":"'못 ~하다'는 '~할 수 없다'와 같은 의미로, 어떤 행동을 할 능력이 없거나 상황이 안 될 때 사용합니다."},{"id":"similar_meaning_035","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"머리가 아파서 병원에 가려고 합니다.","choices":["머리가 아프지만 병원에 안 갈 거예요.","머리가 안 아파서 병원에 가요.","머리가 아파요. 그래서 병원에 가요.","머리가 아파도 병원에 갈 거예요."],"answer":"머리가 아파요. 그래서 병원에 가요.","explanation":"'A-아서/어서 B'는 'A. 그래서 B'와 같이 원인과 결과를 나타냅니다."},{"id":"similar_meaning_036","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"잠시 저기에서 쉬세요.","choices":["여기서 쉬지 마세요.","저기에서 잠깐 쉬십시오.","저기에서 일하세요.","저기에서 쉬고 싶어요."],"answer":"저기에서 잠깐 쉬십시오.","explanation":"'잠시'와 '잠깐'은 비슷한 의미이며, '-세요'와 '-십시오'는 모두 존댓말 명령형입니다."},{"id":"grammar_fill_037","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 공장___ 일합니다.","choices":["에서","에","으로","한테"],"answer":"에서","explanation":"행동이 일어나는 장소에는 조사 '에서'를 사용합니다."},{"id":"grammar_fill_038","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"이것___ 제 안전모예요.","choices":["이","가","은","를"],"answer":"은","explanation":"문장의 주된 화제를 나타낼 때 명사에 받침이 있으면 '은'을 사용합니다."},{"id":"grammar_fill_039","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 점심___ 먹어요.","choices":["이","은","을","에"],"answer":"을","explanation":"동사의 대상이 되는 목적어에 받침이 있으면 '을'을 사용합니다."},{"id":"grammar_fill_040","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"이 사람은 김반장님___.","choices":["입니다","입니까","이세요","이에요"],"answer":"입니다","explanation":"명사 뒤에 붙어 존댓말로 서술할 때 받침이 있으면 '입니다'를 사용합니다."},{"id":"grammar_fill_041","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"어제 많이 피곤___ 집에서 쉬었어요.","choices":["하다","했고","해서","하지만"],"answer":"해서","explanation":"앞 절이 뒤 절의 이유나 원인이 될 때 '-아서/어서'를 사용합니다."},{"id":"grammar_fill_042","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"작업장에서 안전모를 꼭 쓰___.","choices":["세요","아요","습니다","고 싶어요"],"answer":"세요","explanation":"상대방에게 존댓말로 어떤 행동을 하도록 명령하거나 권유할 때 동사 뒤에 '-(으)세요'를 사용합니다."},{"id":"grammar_fill_043","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 오늘 일이 많아서 쉬___.","choices":["지 않아요","지 못해요","안 쉬어요","못 쉬어요"],"answer":"지 못해요","explanation":"외부적 상황 때문에 어떤 행동을 할 수 없을 때 동사 뒤에 '-지 못하다'를 사용합니다."},{"id":"grammar_fill_044","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 배를 만들___ 기술자입니다.","choices":["고","지만","아서","거나"],"answer":"고","explanation":"두 개 이상의 동사를 연결하여 동작의 순서나 내용을 나열할 때 '-고'를 사용합니다."},{"id":"grammar_fill_045","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 고향에 돌아___.","choices":["고 싶어요","고 있어요","지 못해요","아세요"],"answer":"고 싶어요","explanation":"어떤 행동을 하고 싶다는 희망이나 바람을 나타낼 때 동사 뒤에 '-고 싶다'를 사용합니다."},{"id":"grammar_fill_046","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"김반장님은 지금 사무실___ 계세요.","choices":["에서","에","으로","한테"],"answer":"에","explanation":"사람이나 사물이 존재하는 장소를 나타낼 때 조사 '에'를 사용합니다."},{"id":"grammar_fill_047","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 오늘 술을 ___ 마십니다.","choices":["안","못","지 않아요","지 못해요"],"answer":"안","explanation":"어떤 행동을 의도적으로 하지 않을 때 동사 앞에 부사 '안'을 사용합니다."},{"id":"grammar_fill_048","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"어제는 날씨가 좋___ 오늘은 비가 와요.","choices":["고","지만","아서","으면"],"answer":"지만","explanation":"앞 절의 내용과 뒤 절의 내용이 서로 대조되거나 반대될 때 동사나 형용사 뒤에 '-지만'을 사용합니다."},{"id":"sentence_connect_049","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"작업복을 입지 않았습니다. ___ 다리를 다쳤습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그래서","explanation":"'그래서'는 앞 문장의 원인이나 이유에 따른 결과를 나타낼 때 사용합니다."},{"id":"sentence_connect_050","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"이 일은 매우 힘듭니다. ___ 우리 모두 열심히 일합니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"하지만","explanation":"'하지만'은 앞 문장의 내용과 반대되거나 대조되는 내용을 연결할 때 사용합니다."},{"id":"sentence_connect_051","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"저는 아침에 밥을 먹었습니다. ___ 회사에 갔습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그리고","explanation":"'그리고'는 앞 문장의 내용에 이어서 다른 내용을 덧붙이거나 다음 행동을 연결할 때 사용합니다."},{"id":"sentence_connect_052","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"점심시간입니다. ___ 식당에 사람이 너무 많습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그런데","explanation":"'그런데'는 앞 문장과 관련 있지만 예상 밖의 사실이나 새로운 정보를 덧붙일 때 사용합니다."},{"id":"sentence_connect_053","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"머리가 많이 아픕니다. ___ 병원에 가야 합니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그래서","explanation":"'그래서'는 앞 문장의 원인이나 이유에 따른 결과를 나타낼 때 사용합니다."},{"id":"sentence_connect_054","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"용접 작업은 위험합니다. ___ 안전 수칙을 잘 지키면 괜찮습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"하지만","explanation":"'하지만'은 앞 문장의 내용과 반대되거나 대조되는 내용을 연결할 때 사용합니다."},{"id":"sentence_connect_055","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"여기는 작업장입니다. ___ 안전모를 꼭 써야 합니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그리고","explanation":"'그리고'는 앞 문장의 내용에 이어서 다른 내용을 덧붙이거나 다음 행동을 연결할 때 사용합니다."},{"id":"sentence_connect_056","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"지금 휴식 시간입니다. ___ 동료가 아직 일하고 있습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그런데","explanation":"'그런데'는 앞 문장과 관련 있지만 예상 밖의 사실이나 새로운 정보를 덧붙일 때 사용합니다."},{"id":"sentence_connect_057","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"안전 수칙을 잘 지키세요. ___ 사고가 나지 않습니다.","choices":["그래서","그러면","하지만","그리고"],"answer":"그러면","explanation":"'그러면'은 앞 문장의 내용이 조건이 되어 뒤 문장의 결과가 나타날 때 사용합니다."},{"id":"sentence_connect_058","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"점심으로 밥을 먹습니다. ___ 국수를 먹습니다.","choices":["그래서","그러면","하지만","또는"],"answer":"또는","explanation":"'또는'은 두 가지 이상의 선택지 중에서 하나를 고를 때 사용합니다."},{"id":"sentence_connect_059","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"오늘은 용접 작업이 많았습니다. ___ 퇴근 후에 많이 피곤했습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그래서","explanation":"'그래서'는 앞 문장의 원인이나 이유에 따른 결과를 나타낼 때 사용합니다."},{"id":"sentence_connect_060","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"이 커피는 비쌉니다. ___ 맛은 아주 좋습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"하지만","explanation":"'하지만'은 앞 문장의 내용과 반대되거나 대조되는 내용을 연결할 때 사용합니다."}];
+
+const CAT_INFO = {
+  vocab_fill:       { name: '빈칸에 알맞은 어휘 넣기',   color: '#2e6da4', emoji: '📝' },
+  wrong_word:       { name: '잘못 사용한 어휘 찾기',     color: '#dc3545', emoji: '🔍' },
+  similar_meaning:  { name: '비슷한 의미의 문장 고르기', color: '#6f42c1', emoji: '💬' },
+  grammar_fill:     { name: '적절한 문법 표현 넣기',     color: '#28a745', emoji: '📐' },
+  sentence_connect: { name: '문장 연결하기',             color: '#fd7e14', emoji: '🔗' }
+};
+const CAT_INSTRUCTION = {
+  vocab_fill:       '문장에서 ___ 부분에 들어갈 알맞은 어휘를 고르는 4지선다 문제.',
+  wrong_word:       '문장에서 **단어** 로 표시된 틀린 단어를 올바른 단어로 바꾸는 4지선다 문제.',
+  similar_meaning:  '주어진 문장과 가장 비슷한 의미의 문장을 4지선다에서 고르는 문제.',
+  grammar_fill:     '문장에서 ___ 부분에 들어갈 알맞은 문법 표현(조사·어미)을 고르는 4지선다 문제.',
+  sentence_connect: '두 문장 사이의 ___ 에 들어갈 알맞은 연결 표현을 4지선다에서 고르는 문제.'
+};
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw7_bBwy9qnGnC2U8_ZjOE6m_1c1DNCUczQ4Mq1ZEEwKUfwNPWjWLQCbZoBvoSVZLFx/exec";
+
+// ══════════════════════════════════════════════
+// 전역 상태
+// ══════════════════════════════════════════════
+let allQuestions = [];
+let quizQuestions = [];
+let wrongPool = [];       // 오답 복습용 임시 보관
+let currentIdx = 0;
+let studentName = '';
+let empId = '';
+let answers = [];
+let selectedCategories = Object.keys(CAT_INFO);
+let questionCount = 10;
+let sessionId = null;
+
+// ══════════════════════════════════════════════
+// 초기화
+// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// API 키 설정 모달
+// ══════════════════════════════════════════════
+function getApiKey() {
+  return localStorage.getItem('geminiApiKey') ||
+    (typeof CONFIG !== 'undefined' && CONFIG.GEMINI_API_KEY) || '';
+}
+function updateKeyBadge() {
+  const badge = document.getElementById('keyStatusBadge');
+  if (!badge) return;
+  const k = getApiKey();
+  badge.className = 'key-badge ' + (k ? 'key-ok' : 'key-missing');
+  badge.textContent = k ? '설정됨' : '미설정';
+}
+function openKeyModal() {
+  document.getElementById('keyInput').value = localStorage.getItem('geminiApiKey') || '';
+  document.getElementById('keyModal').classList.add('open');
+}
+function closeKeyModal() { document.getElementById('keyModal').classList.remove('open'); }
+function saveKey() {
+  const v = document.getElementById('keyInput').value.trim();
+  if (v) localStorage.setItem('geminiApiKey', v);
+  else localStorage.removeItem('geminiApiKey');
+  updateKeyBadge();
+  closeKeyModal();
+}
+function clearKey() {
+  localStorage.removeItem('geminiApiKey');
+  document.getElementById('keyInput').value = '';
+  updateKeyBadge();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  buildCategoryButtons();
+  setupCountGroup();
+  loadQuestions();
+  document.getElementById('loadingOverlay').style.display = 'none';
+  showScreen('screenStart');
+  restoreLastName();
+  updateKeyBadge();
+});
+
+function loadQuestions() {
+  allQuestions = QUIZ_DATA;
+}
+
+// ══════════════════════════════════════════════
+// 카테고리 버튼 (복수 선택)
+// ══════════════════════════════════════════════
+function buildCategoryButtons() {
+  const wrap = document.getElementById('categoryGroup');
+  wrap.innerHTML = '';
+  Object.entries(CAT_INFO).forEach(([key, info]) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn selected';
+    btn.dataset.key = key;
+    btn.style.background = info.color;
+    btn.style.borderColor = info.color;
+    btn.style.color = '#fff';
+    btn.innerHTML = `${info.emoji}&nbsp; ${info.name}`;
+    btn.onclick = () => toggleCat(btn, key);
+    wrap.appendChild(btn);
+  });
+}
+
+function toggleCat(btn, key) {
+  const sel = selectedCategories.includes(key);
+  if (sel && selectedCategories.length <= 1) return; // 최소 1개 유지
+  if (sel) {
+    selectedCategories = selectedCategories.filter(k => k !== key);
+    btn.classList.remove('selected');
+    btn.style.background = '#fff';
+    btn.style.color = CAT_INFO[key].color;
+    btn.style.borderColor = CAT_INFO[key].color;
+  } else {
+    selectedCategories.push(key);
+    btn.classList.add('selected');
+    btn.style.background = CAT_INFO[key].color;
+    btn.style.borderColor = CAT_INFO[key].color;
+    btn.style.color = '#fff';
+  }
+}
+
+// ══════════════════════════════════════════════
+// 문제 수 선택
+// ══════════════════════════════════════════════
+function setupCountGroup() {
+  document.querySelectorAll('#countGroup .option-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#countGroup .option-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      questionCount = btn.dataset.val === 'all' ? 'all' : parseInt(btn.dataset.val);
+    };
+  });
+}
+
+// ══════════════════════════════════════════════
+// 이름 복원
+// ══════════════════════════════════════════════
+function restoreLastName() {
+  const n = localStorage.getItem('lastStudentName');
+  const e = localStorage.getItem('lastEmpId');
+  if (n) document.getElementById('inputName').value = n;
+  if (e) document.getElementById('inputEmpId').value = e;
+}
+
+// ══════════════════════════════════════════════
+// 퀴즈 시작
+// ══════════════════════════════════════════════
+function startQuiz(pool = null) {
+  studentName = document.getElementById('inputName').value.trim();
+  empId = document.getElementById('inputEmpId').value.trim();
+  if (!studentName) { alert('이름을 입력해주세요!'); return; }
+  localStorage.setItem('lastStudentName', studentName);
+  localStorage.setItem('lastEmpId', empId);
+
+  if (pool) {
+    quizQuestions = pool.sort(() => Math.random() - 0.5);
+  } else {
+    let filtered = allQuestions.filter(q => selectedCategories.includes(q.category_key));
+    filtered = filtered.sort(() => Math.random() - 0.5);
+    const cnt = questionCount === 'all' ? filtered.length : Math.min(questionCount, filtered.length);
+    quizQuestions = filtered.slice(0, cnt);
+  }
+
+  if (!quizQuestions.length) { alert('선택한 카테고리에 문제가 없습니다.'); return; }
+  currentIdx = 0; answers = []; sessionId = Date.now().toString();
+
+  const cats = [...new Set(quizQuestions.map(q => CAT_INFO[q.category_key]?.emoji || '📝'))].join(' ');
+  document.getElementById('quizTitle').textContent = `${cats} 총 ${quizQuestions.length}문제`;
+  showScreen('screenQuiz');
+  showQuestion(0);
+}
+
+// ══════════════════════════════════════════════
+// 문제 출력
+// ══════════════════════════════════════════════
+function showQuestion(idx) {
+  const q = quizQuestions[idx];
+  const total = quizQuestions.length;
+  const cat = CAT_INFO[q.category_key] || { name: q.category, color: '#2e6da4', emoji: '📝' };
+
+  document.getElementById('progressFill').style.width = `${(idx / total) * 100}%`;
+  document.getElementById('progressText').textContent = `${idx + 1} / ${total}`;
+
+  document.getElementById('questionMeta').innerHTML =
+    `<span class="badge" style="background:${cat.color}20;color:${cat.color};border:1px solid ${cat.color}40">
+       ${cat.emoji} ${cat.name}
+     </span>`;
+
+  // **bold** → 빨간 밑줄
+  const qHtml = q.question.replace(/\*\*(.+?)\*\*/g,
+    '<strong style="color:#dc2626;text-decoration:underline;text-underline-offset:3px">$1</strong>');
+  document.getElementById('questionText').innerHTML = qHtml;
+
+  const area = document.getElementById('choicesArea');
+  area.innerHTML = '';
+  ['A','B','C','D'].forEach((lbl, i) => {
+    if (i >= q.choices.length) return;
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.dataset.choice = q.choices[i];
+    btn.innerHTML = `<span class="choice-label">${lbl}</span>${q.choices[i]}`;
+    btn.onclick = () => selectChoice(btn, q.choices[i], q);
+    area.appendChild(btn);
+  });
+
+  document.getElementById('nextBtn').style.display = 'none';
+  const exp = document.getElementById('explanationArea');
+  exp.style.display = 'none'; exp.innerHTML = '';
+}
+
+function selectChoice(btn, choice, q) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  const correct = choice === q.answer;
+
+  document.querySelectorAll('.choice-btn').forEach(b => {
+    if (b.dataset.choice === q.answer) b.classList.add('correct');
+  });
+  if (!correct) btn.classList.add('wrong');
+
+  answers.push({ id: q.id, category: q.category, category_key: q.category_key,
+    question: q.question, correct, chosen: choice, answer: q.answer, explanation: q.explanation });
+
+  const exp = document.getElementById('explanationArea');
+  exp.style.display = 'block';
+  exp.className = correct ? 'explanation-box' : 'explanation-box wrong-exp';
+  exp.innerHTML = correct
+    ? `✅ <b>정답!</b>&nbsp; ${q.explanation}`
+    : `❌ <b>오답.</b>&nbsp; 정답: <b>${q.answer}</b><br>${q.explanation}`;
+
+  const nb = document.getElementById('nextBtn');
+  nb.style.display = 'block';
+  nb.textContent = currentIdx + 1 < quizQuestions.length ? '다음 문제 →' : '결과 보기 →';
+}
+
+function nextQuestion() {
+  currentIdx++;
+  if (currentIdx < quizQuestions.length) { showQuestion(currentIdx); }
+  else { showResult(); }
+}
+
+function confirmExit() {
+  if (confirm('퀴즈를 중단하고 처음으로 돌아갈까요?')) goHome();
+}
+
+// ══════════════════════════════════════════════
+// 결과 화면
+// ══════════════════════════════════════════════
+function showResult() {
+  const total = answers.length;
+  const correct = answers.filter(a => a.correct).length;
+  const pct = total ? Math.round(correct / total * 100) : 0;
+  const grade = pct >= 90 ? 'A' : pct >= 70 ? 'B' : pct >= 50 ? 'C' : 'D';
+  const msgs = { A: '완벽해요! 🏆', B: '잘 했어요! 🎉', C: '더 노력해요! 💪', D: '다시 도전! 🔥' };
+
+  document.getElementById('resultScore').textContent = pct;
+  document.getElementById('resultAccuracy').textContent = pct + '%';
+  document.getElementById('resultCorrect').textContent = `${correct}/${total}`;
+  document.getElementById('resultGrade').textContent = grade;
+  document.getElementById('resultMessage').textContent = msgs[grade];
+
+  // 카테고리별 통계
+  const catStats = document.getElementById('catStats');
+  catStats.innerHTML = '';
+  Object.keys(CAT_INFO).forEach(key => {
+    const catAnswers = answers.filter(a => a.category_key === key);
+    if (!catAnswers.length) return;
+    const c = catAnswers.filter(a => a.correct).length;
+    const p = Math.round(c / catAnswers.length * 100);
+    const info = CAT_INFO[key];
+    catStats.innerHTML += `
+      <div class="cat-stat-row">
+        <span style="width:22px;text-align:center">${info.emoji}</span>
+        <span style="flex:1;font-size:0.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${info.name}</span>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:${p}%;background:${info.color}"></div></div>
+        <span class="cat-pct" style="color:${info.color}">${c}/${catAnswers.length}</span>
+      </div>`;
+  });
+
+  // 틀린 문제 목록
+  const wrongAnswers = answers.filter(a => !a.correct);
+  wrongPool = wrongAnswers.map(a => allQuestions.find(q => q.id === a.id)).filter(Boolean);
+  const wCard = document.getElementById('wrongListCard');
+  if (wrongAnswers.length > 0) {
+    wCard.style.display = 'block';
+    const wList = document.getElementById('wrongList');
+    wList.innerHTML = wrongAnswers.map(a => {
+      const cat = CAT_INFO[a.category_key] || { emoji: '📝', color: '#666' };
+      const qHtml = a.question.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      return `<div class="wrong-item">
+        <div class="wrong-q"><span style="color:${cat.color}">${cat.emoji}</span> ${qHtml}</div>
+        <div class="wrong-ans">내 답: <span style="color:var(--danger)">${a.chosen}</span>
+          &nbsp;|&nbsp; 정답: <span style="color:var(--success)">${a.answer}</span></div>
+      </div>`;
+    }).join('');
+    document.getElementById('aiCard').style.display = 'none';
+    document.getElementById('aiBtn').disabled = false;
+    document.getElementById('aiBtn').textContent = '🤖 AI 유사문제 생성하기';
+    document.getElementById('retryWrongBtn').style.display = wrongPool.length ? '' : 'none';
+  } else {
+    wCard.style.display = 'none';
+  }
+
+  showScreen('screenResult');
+  saveHistory(correct, total, pct, grade);
+  sendToSheet(correct, total, pct);
+}
+
+// ══════════════════════════════════════════════
+// AI 유사문제 생성
+// ══════════════════════════════════════════════
+async function generateAISimilarQuestions() {
+  const wrongAnswers = answers.filter(a => !a.correct);
+  if (!wrongAnswers.length) { alert('틀린 문제가 없습니다!'); return; }
+
+  const API_KEY = getApiKey();
+  if (!API_KEY) { openKeyModal(); return; }
+
+  const btn = document.getElementById('aiBtn');
+  btn.disabled = true; btn.textContent = '🤖 생성 중...';
+  showLoading('🤖 AI가 유사문제를 생성 중입니다...');
+
+  const wrongListText = wrongAnswers.map((a, i) => {
+    const key = a.category_key;
+    return `${i+1}. [${a.category}]\n문제: ${a.question}\n정답: ${a.answer}\n해설: ${a.explanation}`;
+  }).join('\n\n');
+
+  const catDesc = Object.entries(CAT_INSTRUCTION)
+    .map(([k, v]) => `- ${CAT_INFO[k].name}: ${v}`)
+    .join('\n');
+
+  const prompt = `아래는 한국어 초급 1-2 학습자가 틀린 문제 목록입니다.
+각 문제와 같은 유형의 유사한 연습문제를 1개씩 만들어주세요.
+
+[틀린 문제 목록]
+${wrongListText}
+
+[유형 설명]
+${catDesc}
+
+조건:
+- 대상: 삼성중공업 외국인 근로자 (한국어 초급 1-2)
+- 같은 문법/어휘 포인트를 다른 문장으로 연습
+- 선택지 4개, 정답 1개
+- based_on 번호는 위 목록의 번호와 일치
+
+반드시 JSON만 출력:
+{"generated": [{"based_on": 1, "category_key": "vocab_fill", "category": "빈칸에 알맞은 어휘 넣기", "question": "...", "choices": ["A","B","C","D"], "answer": "A", "explanation": "..."}]}`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          systemInstruction: { parts: [{ text: '반드시 순수 JSON만 출력하세요. 마크다운(```)을 절대 사용하지 마세요.' }] }
+        })
+      }
+    );
+    const data = await res.json();
+    let raw = data.candidates[0].content.parts[0].text.trim();
+    raw = raw.replace(/```json\s*|\s*```/g, '').trim();
+    const result = JSON.parse(raw);
+    renderAIQuestions(result.generated);
+    btn.textContent = '✅ 유사문제 생성 완료';
+  } catch(e) {
+    alert('AI 유사문제 생성 실패: ' + e.message);
+    btn.disabled = false; btn.textContent = '🤖 AI 유사문제 생성하기';
+  } finally {
+    hideLoading();
+  }
+}
+
+function renderAIQuestions(generated) {
+  const card = document.getElementById('aiCard');
+  const list = document.getElementById('aiList');
+  card.style.display = 'block';
+  list.innerHTML = '';
+  const labels = ['A','B','C','D'];
+
+  generated.forEach((q, qi) => {
+    const cat = CAT_INFO[q.category_key] || { name: q.category, color: '#2e6da4', emoji: '📝' };
+    const div = document.createElement('div');
+    div.className = 'ai-quiz-item';
+    div.style.borderLeftColor = cat.color;
+
+    const qHtml = q.question.replace(/\*\*(.+?)\*\*/g,
+      '<strong style="color:#dc2626;text-decoration:underline">$1</strong>');
+
+    const choicesHtml = q.choices.map((c, ci) =>
+      `<button class="ai-choice" data-choice="${c}" data-answer="${encodeURIComponent(q.answer)}"
+              data-exp="${encodeURIComponent(q.explanation)}" data-qi="${qi}"
+              onclick="selectAIChoice(this, ${qi})">
+         <span class="choice-label">${labels[ci]}</span>${c}
+       </button>`
+    ).join('');
+
+    div.innerHTML = `
+      <div class="ai-quiz-badge" style="color:${cat.color}">${cat.emoji} ${cat.name} · 유사문제 ${qi+1}</div>
+      <div class="ai-quiz-q">${qHtml}</div>
+      <div id="ai-choices-${qi}">${choicesHtml}</div>
+      <div class="ai-exp" id="ai-exp-${qi}"></div>`;
+    list.appendChild(div);
+  });
+
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function selectAIChoice(btn, qi) {
+  const parent = document.getElementById(`ai-choices-${qi}`);
+  parent.querySelectorAll('.ai-choice').forEach(b => b.disabled = true);
+
+  const choice = btn.dataset.choice;
+  const answer = decodeURIComponent(btn.dataset.answer);
+  const explanation = decodeURIComponent(btn.dataset.exp);
+  const correct = choice === answer;
+
+  parent.querySelectorAll('.ai-choice').forEach(b => {
+    if (b.dataset.choice === answer) b.classList.add('ai-correct');
+  });
+  if (!correct) btn.classList.add('ai-wrong');
+
+  const expDiv = document.getElementById(`ai-exp-${qi}`);
+  expDiv.style.display = 'block';
+  expDiv.innerHTML = correct
+    ? `✅ <b>정답!</b>&nbsp; ${explanation}`
+    : `❌ <b>오답.</b>&nbsp; 정답: <b>${answer}</b><br>${explanation}`;
+}
+
+// ══════════════════════════════════════════════
+// 오답 복습 / 다시 풀기
+// ══════════════════════════════════════════════
+function retryWrong() {
+  if (!wrongPool.length) { alert('오답 문제가 없습니다.'); return; }
+  startQuiz(wrongPool);
+}
+
+function restartSame() { startQuiz([...quizQuestions]); }
+
+function goHome() {
+  showScreen('screenStart');
+  document.getElementById('aiCard').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════
+// 화면 전환
+// ══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'screenHistory') renderHistory();
+}
+
+// ══════════════════════════════════════════════
+// 로딩 오버레이
+// ══════════════════════════════════════════════
+function showLoading(msg = '로딩 중...') {
+  document.getElementById('loadingText').textContent = msg;
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
+
+// ══════════════════════════════════════════════
+// 이력 저장/출력
+// ══════════════════════════════════════════════
+function saveHistory(correct, total, pct, grade) {
+  const rec = {
+    sessionId, name: studentName, empId,
+    correct, total, pct, grade,
+    categories: [...new Set(quizQuestions.map(q => q.category))].join(', '),
+    date: new Date().toLocaleString('ko-KR')
+  };
+  const key = 'quizHistory_v2';
+  const hist = JSON.parse(localStorage.getItem(key) || '[]');
+  hist.unshift(rec);
+  localStorage.setItem(key, JSON.stringify(hist.slice(0, 200)));
+}
+
+function renderHistory() {
+  const key = 'quizHistory_v2';
+  const hist = JSON.parse(localStorage.getItem(key) || '[]');
+  const name = localStorage.getItem('lastStudentName') || '';
+
+  const myRec = hist.filter(r => r.name === name);
+  const myEl = document.getElementById('myHistoryList');
+  const nameInfo = document.getElementById('myNameInfo');
+
+  if (name) {
+    nameInfo.style.display = 'block';
+    nameInfo.innerHTML = `<b>${name}</b> 님의 기록 · 총 ${myRec.length}회`;
+  }
+  myEl.innerHTML = myRec.length
+    ? myRec.map(r => histCard(r)).join('')
+    : '<div class="empty-state"><div class="empty-icon">📭</div>기록이 없어요</div>';
+
+  document.getElementById('allHistoryList').innerHTML = hist.length
+    ? hist.map(r => histCard(r)).join('')
+    : '<div class="empty-state"><div class="empty-icon">📭</div>기록이 없어요</div>';
+}
+
+function histCard(r) {
+  const col = r.pct >= 70 ? 'var(--success)' : r.pct >= 50 ? 'var(--warning)' : 'var(--danger)';
+  return `<div class="history-card">
+    <div class="history-meta">
+      <div><b>${r.name}</b><span style="color:var(--muted);font-size:0.85rem;margin-left:6px">${r.empId || ''}</span></div>
+      <span class="history-score" style="color:${col}">${r.pct}점 (${r.grade})</span>
+    </div>
+    <div style="font-size:0.82rem;color:var(--muted);margin-top:4px">
+      ${r.correct}/${r.total} 정답 · ${r.categories || ''}<br>${r.date}
+    </div>
+  </div>`;
+}
+
+function switchTab(tab) {
+  const mine = tab === 'mine';
+  document.getElementById('tabContentMine').style.display = mine ? '' : 'none';
+  document.getElementById('tabContentAll').style.display = mine ? 'none' : '';
+  document.getElementById('tabMine').classList.toggle('active', mine);
+  document.getElementById('tabAll').classList.toggle('active', !mine);
+}
+
+function exportCSV() {
+  const hist = JSON.parse(localStorage.getItem('quizHistory_v2') || '[]');
+  if (!hist.length) { alert('기록이 없습니다.'); return; }
+  const rows = [['이름','사번','점수','정답/총문제','등급','카테고리','날짜']];
+  hist.forEach(r => rows.push([r.name, r.empId||'', r.pct+'%', `${r.correct}/${r.total}`, r.grade, r.categories||'', r.date]));
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'quiz_history.csv'; a.click();
+}
+
+function clearAllData() {
+  if (confirm('전체 학습 기록을 삭제할까요? 복구할 수 없습니다.')) {
+    localStorage.removeItem('quizHistory_v2');
+    renderHistory();
+  }
+}
+
+// ══════════════════════════════════════════════
+// Google Sheets 전송 (선택)
+// ══════════════════════════════════════════════
+async function sendToSheet(correct, total, pct) {
+  if (!GOOGLE_SCRIPT_URL || !studentName) return;
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: studentName, empId, correct, total, pct,
+        categories: [...new Set(quizQuestions.map(q => q.category))].join(', '),
+        date: new Date().toISOString()
+      })
+    });
+  } catch(_) {}
+}
+</script>
+</body>
+</html>

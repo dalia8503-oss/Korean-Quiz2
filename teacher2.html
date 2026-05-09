@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>한국어 퀴즈 — 교사 관리</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary:#2563eb;--primary-dark:#1d4ed8;
+      --success:#16a34a;--danger:#dc2626;--warning:#d97706;
+      --bg:#f1f5f9;--card:#fff;--text:#1e293b;
+      --muted:#64748b;--border:#e2e8f0;--radius:14px;
+      --shadow:0 2px 16px rgba(0,0,0,0.07);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+    /* ── 로그인 ── */
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;}
+    .login-box{background:#fff;border-radius:20px;padding:36px 28px;width:100%;max-width:360px;box-shadow:var(--shadow);}
+    .login-logo{text-align:center;margin-bottom:20px;}
+    .login-logo h1{font-size:1.4rem;font-weight:800;color:var(--primary);margin-top:8px;}
+    .login-logo p{font-size:0.85rem;color:var(--muted);margin-top:4px;}
+
+    /* ── 앱 레이아웃 ── */
+    .app{display:none;}
+    .app.show{display:block;}
+    .top-nav{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;height:56px;}
+    .top-nav-title{font-weight:800;font-size:1rem;color:var(--primary);flex:1;}
+    .nav-logout{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:0.82rem;cursor:pointer;color:var(--muted);}
+    .tab-nav{display:flex;gap:0;overflow-x:auto;background:#fff;border-bottom:2px solid var(--border);padding:0 12px;}
+    .tab-nav::-webkit-scrollbar{display:none;}
+    .tnav-btn{padding:14px 18px;border:none;background:none;font-size:0.9rem;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;}
+    .tnav-btn.active{color:var(--primary);border-bottom-color:var(--primary);}
+    .tab-content{display:none;padding:20px;max-width:900px;margin:0 auto;}
+    .tab-content.show{display:block;}
+
+    /* ── 공통 카드 ── */
+    .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:16px;}
+    .card-title{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .section-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
+    .stat-card{background:#fff;border-radius:12px;padding:16px;box-shadow:var(--shadow);text-align:center;}
+    .stat-val{font-size:1.8rem;font-weight:900;color:var(--primary);}
+    .stat-lbl{font-size:0.8rem;color:var(--muted);margin-top:2px;}
+
+    /* ── 버튼 ── */
+    .btn{display:inline-block;padding:10px 18px;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.15s;}
+    .btn:active{transform:scale(0.97);}
+    .btn-primary{background:var(--primary);color:#fff;}
+    .btn-primary:hover{background:var(--primary-dark);}
+    .btn-danger{background:var(--danger);color:#fff;}
+    .btn-outline{background:transparent;color:var(--primary);border:2px solid var(--primary);}
+    .btn-gray{background:var(--border);color:var(--text);}
+    .btn-sm{padding:6px 12px;font-size:0.82rem;}
+    .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+
+    /* ── 입력 ── */
+    input[type="text"],input[type="password"]{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:10px;font-size:0.95rem;outline:none;transition:border 0.2s;}
+    input[type="text"]:focus,input[type="password"]:focus{border-color:var(--primary);}
+    label{font-size:0.85rem;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;}
+
+    /* ── 테이블 ── */
+    .tbl-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+    th{background:#f8fafc;padding:10px 12px;text-align:left;font-weight:700;color:var(--muted);border-bottom:2px solid var(--border);}
+    td{padding:9px 12px;border-bottom:1px solid var(--border);}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#fafafa;}
+    .badge{padding:3px 8px;border-radius:99px;font-size:0.75rem;font-weight:700;}
+    .badge-A{background:#dcfce7;color:#16a34a;}
+    .badge-B{background:#dbeafe;color:#2563eb;}
+    .badge-C{background:#fef9c3;color:#ca8a04;}
+    .badge-D{background:#fee2e2;color:#dc2626;}
+
+    /* ── 바 차트 ── */
+    .bar-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);}
+    .bar-row:last-child{border-bottom:none;}
+    .bar-label{width:160px;font-size:0.83rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .bar-track{flex:1;height:10px;background:var(--border);border-radius:99px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:99px;transition:width 0.6s;}
+    .bar-val{width:50px;text-align:right;font-size:0.82rem;font-weight:700;}
+
+    /* ── 문제 카드 ── */
+    .q-card{background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px;margin-bottom:10px;}
+    .q-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+    .q-text{font-weight:600;line-height:1.6;margin-bottom:6px;}
+    .q-choices{display:flex;flex-wrap:wrap;gap:6px;font-size:0.82rem;}
+    .q-choice{padding:3px 8px;background:#f1f5f9;border-radius:6px;}
+    .q-choice.correct{background:#dcfce7;color:#16a34a;font-weight:700;}
+
+    /* ── 검색/필터 ── */
+    .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+    .search-input{flex:1;min-width:160px;padding:9px 13px;border:1px solid var(--border);border-radius:10px;font-size:0.9rem;outline:none;}
+    .search-input:focus{border-color:var(--primary);}
+    select{padding:9px 13px;border:1px solid var(--border);border-radius:10px;font-size:0.85rem;outline:none;background:#fff;cursor:pointer;}
+    select:focus{border-color:var(--primary);}
+
+    /* ── 빈 상태 ── */
+    .empty{text-align:center;padding:40px 0;color:var(--muted);}
+    .empty-icon{font-size:2.5rem;margin-bottom:8px;}
+
+    /* ── 모달 ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;}
+    .modal-overlay.open{display:flex;}
+    .modal-box{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:420px;}
+    .modal-close{float:right;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted);}
+
+    /* ── 알림 토스트 ── */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:10px;font-size:0.9rem;z-index:999;display:none;white-space:nowrap;}
+
+    @media(max-width:600px){
+      .bar-label{width:110px;}
+      .tnav-btn{padding:12px 12px;font-size:0.82rem;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ 로그인 화면 ══ -->
+<div id="loginWrap" class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">
+      <div style="font-size:2.5rem;">📊</div>
+      <h1>교사 관리 페이지</h1>
+      <p>한국어 초급 1-2 퀴즈 관리자</p>
+    </div>
+    <label>비밀번호</label>
+    <input type="password" id="pwInput" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn btn-primary" style="width:100%;margin-top:12px;padding:14px;" onclick="login()">로그인</button>
+    <p style="font-size:0.78rem;color:var(--muted);text-align:center;margin-top:12px;">기본 비밀번호: <b>samsung2025</b></p>
+  </div>
+</div>
+
+<!-- ══ 앱 화면 ══ -->
+<div class="app" id="appWrap">
+  <div class="top-nav">
+    <span class="top-nav-title">📊 한국어 퀴즈 관리자</span>
+    <button class="nav-logout" onclick="logout()">로그아웃</button>
+  </div>
+  <div class="tab-nav">
+    <button class="tnav-btn active" onclick="switchTab('dashboard')" id="tnav-dashboard">🏠 대시보드</button>
+    <button class="tnav-btn" onclick="switchTab('students')" id="tnav-students">👥 학생 기록</button>
+    <button class="tnav-btn" onclick="switchTab('analysis')" id="tnav-analysis">📈 분석</button>
+    <button class="tnav-btn" onclick="switchTab('questions')" id="tnav-questions">📝 문제 목록</button>
+    <button class="tnav-btn" onclick="switchTab('settings')" id="tnav-settings">⚙️ 설정</button>
+  </div>
+
+  <!-- 대시보드 -->
+  <div class="tab-content show" id="tab-dashboard">
+    <div class="section-row" id="dashStats"></div>
+    <div class="card">
+      <div class="card-title">📂 카테고리별 평균 정답률</div>
+      <div id="catChart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 상위 10명</div>
+      <div class="tbl-wrap"><table id="topTable">
+        <thead><tr><th>순위</th><th>이름</th><th>사번</th><th>최고점</th><th>평균</th><th>시험횟수</th></tr></thead>
+        <tbody id="topBody"></tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🕐 최근 학습 기록</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>이름</th><th>사번</th><th>점수</th><th>정답</th><th>등급</th><th>일시</th></tr></thead>
+        <tbody id="recentBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- 학생 기록 -->
+  <div class="tab-content" id="tab-students">
+    <div class="filter-row">
+      <input class="search-input" id="stuSearch" placeholder="이름 또는 사번 검색..." oninput="renderStudents()">
+      <select id="stuGrade" onchange="renderStudents()">
+        <option value="">전체 등급</option>
+        <option value="A">A등급</option>
+        <option value="B">B등급</option>
+        <option value="C">C등급</option>
+        <option value="D">D등급</option>
+      </select>
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>이름</th><th>사번</th><th>점수</th><th>정답</th><th>카테고리</th><th>등급</th><th>일시</th></tr></thead>
+      <tbody id="stuBody"></tbody>
+    </table></div>
+    <div id="stuEmpty" class="empty" style="display:none;"><div class="empty-icon">📭</div>기록이 없습니다</div>
+  </div>
+
+  <!-- 분석 -->
+  <div class="tab-content" id="tab-analysis">
+    <div class="section-row" id="analysisStats"></div>
+    <div class="card">
+      <div class="card-title">📉 카테고리별 오답률 (어려운 순)</div>
+      <div id="wrongRateChart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 점수 분포</div>
+      <div id="scoreDistChart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔍 자주 틀리는 카테고리 TOP 3</div>
+      <div id="weakCatList"></div>
+    </div>
+  </div>
+
+  <!-- 문제 목록 -->
+  <div class="tab-content" id="tab-questions">
+    <div class="filter-row">
+      <input class="search-input" id="qSearch" placeholder="문제 검색..." oninput="renderQuestions()">
+      <select id="qCat" onchange="renderQuestions()">
+        <option value="">전체 카테고리</option>
+        <option value="vocab_fill">빈칸 어휘</option>
+        <option value="wrong_word">잘못된 어휘</option>
+        <option value="similar_meaning">비슷한 의미</option>
+        <option value="grammar_fill">문법 표현</option>
+        <option value="sentence_connect">문장 연결</option>
+      </select>
+    </div>
+    <div id="qCount" style="font-size:0.85rem;color:var(--muted);margin-bottom:10px;"></div>
+    <div id="qList"></div>
+  </div>
+
+  <!-- 설정 -->
+  <div class="tab-content" id="tab-settings">
+    <div class="card">
+      <div class="card-title">🔑 비밀번호 변경</div>
+      <label>현재 비밀번호</label>
+      <input type="password" id="pwCur" placeholder="현재 비밀번호" style="margin-bottom:10px;">
+      <label>새 비밀번호</label>
+      <input type="password" id="pwNew" placeholder="새 비밀번호 (4자 이상)" style="margin-bottom:10px;">
+      <button class="btn btn-primary" onclick="changePassword()">변경</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📥 CSV 가져오기</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;">학생 기기에서 내보낸 CSV를 붙여넣거나 파일로 가져오세요.</p>
+      <input type="file" id="csvFile" accept=".csv" onchange="importCSV(this)" style="margin-bottom:10px;font-size:0.85rem;">
+      <textarea id="csvPaste" placeholder="또는 CSV 내용을 여기에 붙여넣기..." rows="5"
+        style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;font-size:0.82rem;resize:vertical;margin-bottom:10px;font-family:monospace;"></textarea>
+      <button class="btn btn-primary btn-sm" onclick="importCSVPaste()">가져오기</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📤 데이터 내보내기</div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="exportCSV()">📥 CSV 다운로드</button>
+        <button class="btn btn-gray" onclick="exportJSON()">📄 JSON 백업</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--danger);">🗑 데이터 삭제</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;">삭제된 데이터는 복구할 수 없습니다.</p>
+      <button class="btn btn-danger" onclick="clearAll()">전체 학습 기록 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// 퀴즈 데이터 (student2.html 과 동일)
+// ══════════════════════════════════════════════
+const QUIZ_DATA = [{"id":"vocab_fill_001","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"저는 매일 아침 ___ 에 출근합니다.","choices":["회사","병원","학교","시장"],"answer":"회사","explanation":"근로자는 일하러 '회사'나 '공장'에 출근합니다."},{"id":"vocab_fill_002","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"작업할 때는 반드시 ___ 를 착용하세요. 안전이 중요합니다.","choices":["작업복","안전모","장갑","안경"],"answer":"안전모","explanation":"위험한 작업 환경에서는 머리를 보호하기 위해 '안전모'를 써야 합니다."},{"id":"vocab_fill_003","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"우리는 배를 만들어요. 그래서 ___ 작업이 많아요.","choices":["청소","용접","요리","운전"],"answer":"용접","explanation":"선박을 만드는 회사에서는 금속을 이어 붙이는 '용접' 작업이 중요합니다."},{"id":"vocab_fill_004","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"점심시간이에요. 이제 ___ 을/를 먹으러 식당에 가요.","choices":["밥","물","커피","빵"],"answer":"밥","explanation":"점심시간에는 주로 '밥'을 포함한 식사를 합니다."},{"id":"vocab_fill_005","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"오늘 하루 종일 일해서 몸이 너무 ___ .","choices":["좋다","기쁘다","슬프다","피곤하다"],"answer":"피곤하다","explanation":"오랫동안 일한 후 몸이 지치고 힘든 상태를 '피곤하다'고 표현합니다."},{"id":"vocab_fill_006","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"갑자기 배가 아파요. ___ 에 가야 해요.","choices":["식당","병원","사무실","창고"],"answer":"병원","explanation":"몸이 아프거나 다쳤을 때는 치료를 받기 위해 '병원'에 갑니다."},{"id":"vocab_fill_007","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"공장에서 일할 때는 안전을 위해 ___ 을/를 입어야 합니다.","choices":["작업복","잠옷","양복","한복"],"answer":"작업복","explanation":"작업장에서는 안전과 효율을 위해 정해진 '작업복'을 착용합니다."},{"id":"vocab_fill_008","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"힘들게 일했으니까 잠시 ___ 을/를 취해요.","choices":["공부","운동","휴식","식사"],"answer":"휴식","explanation":"힘들게 일한 후에는 잠시 '휴식'을 취해서 쉬는 것이 좋습니다."},{"id":"vocab_fill_009","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"작업 중에 무거운 것을 들다가 ___ 가 아파요.","choices":["머리","눈","허리","귀"],"answer":"허리","explanation":"무거운 것을 들 때 잘못된 자세로 들면 '허리'를 다칠 수 있습니다."},{"id":"vocab_fill_010","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"저는 매일 점심을 ___ 에서 먹어요.","choices":["작업장","식당","창고","화장실"],"answer":"식당","explanation":"보통 '식당'에서 점심 식사를 합니다."},{"id":"vocab_fill_011","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"일이 많아서 힘들지만, 새로운 것을 배워서 정말 ___ .","choices":["무섭다","슬프다","기쁘다","피곤하다"],"answer":"기쁘다","explanation":"힘든 상황에서도 새로운 것을 배우고 좋은 감정을 느낄 때 '기쁘다'고 말합니다."},{"id":"vocab_fill_012","category":"빈칸에 알맞은 어휘 넣기","category_key":"vocab_fill","color":"#2e6da4","question":"우리 회사는 큰 ___ 을/를 만드는 회사입니다.","choices":["집","차","배","비행기"],"answer":"배","explanation":"삼성중공업은 '배'(선박)를 만드는 회사입니다."},{"id":"wrong_word_013","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"아침에 커피를 **먹었습니다**.","choices":["마셨습니다","입었습니다","탔습니다","갔습니다"],"answer":"마셨습니다","explanation":"커피는 '마시다' 동사를 사용합니다."},{"id":"wrong_word_014","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"작업할 때 안전모를 꼭 **잡으세요**.","choices":["쓰세요","벗으세요","먹으세요","타세요"],"answer":"쓰세요","explanation":"안전모는 '쓰다' 동사를 사용합니다."},{"id":"wrong_word_015","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"**화장실에서** 철을 용접해요.","choices":["작업장에서","식당에서","병원에서","사무실에서"],"answer":"작업장에서","explanation":"용접은 보통 '작업장'에서 합니다."},{"id":"wrong_word_016","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"일이 너무 많아서 몸이 정말 **좋습니다**.","choices":["피곤합니다","기쁩니다","슬픕니다","무섭습니다"],"answer":"피곤합니다","explanation":"몸이 힘들 때 '피곤하다'고 말합니다."},{"id":"wrong_word_017","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"오늘 새 작업복을 **보세요**.","choices":["입으세요","만드세요","사세요","주세요"],"answer":"입으세요","explanation":"작업복은 '입다' 동사를 사용합니다."},{"id":"wrong_word_018","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"삼성중공업에서 **밥을** 만듭니다.","choices":["배를","커피를","물을","점심을"],"answer":"배를","explanation":"삼성중공업에서는 주로 '배'를 만듭니다."},{"id":"wrong_word_019","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"배가 아파서 **식당에** 갔습니다.","choices":["병원에","회사에","창고에","사무실에"],"answer":"병원에","explanation":"몸이 아프면 '병원'에 갑니다."},{"id":"wrong_word_020","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"매일 회사에 **마십니다**.","choices":["출퇴근합니다","용접합니다","휴식합니다","작업합니다"],"answer":"출퇴근합니다","explanation":"회사에 가고 올 때 '출퇴근하다' 동사를 사용합니다."},{"id":"wrong_word_021","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"제가 실수해서 정말 **감사합니다**.","choices":["미안합니다","괜찮습니다","좋습니다","기쁩니다"],"answer":"미안합니다","explanation":"실수했을 때는 '미안하다'고 말합니다."},{"id":"wrong_word_022","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"무거운 것을 들어서 **눈이** 아픕니다.","choices":["허리가","손이","귀가","머리가"],"answer":"허리가","explanation":"무거운 것을 들면 보통 '허리'가 아픕니다."},{"id":"wrong_word_023","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"점심시간에 잠시 **커피를** 합니다.","choices":["휴식을","용접을","작업을","식사를"],"answer":"휴식을","explanation":"'휴식을 하다'는 쉬는 것을 의미합니다."},{"id":"wrong_word_024","category":"잘못 사용한 어휘 찾기","category_key":"wrong_word","color":"#dc3545","question":"오후 1시에 **저녁을** 먹어요.","choices":["점심을","아침을","휴식을","커피를"],"answer":"점심을","explanation":"오후 1시에는 주로 '점심'을 먹습니다."},{"id":"similar_meaning_025","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"안전모를 꼭 쓰세요.","choices":["안전모를 쓰면 안 돼요.","안전모가 필요 없어요.","안전모를 써야 합니다.","안전모를 사고 싶어요."],"answer":"안전모를 써야 합니다.","explanation":"'꼭 쓰세요'는 '반드시 써야 한다'는 의미로, '써야 합니다'와 의미가 비슷합니다."},{"id":"similar_meaning_026","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"저는 지금 많이 피곤합니다.","choices":["저는 지금 밥을 먹고 싶습니다.","저는 지금 좀 쉬고 싶습니다.","저는 지금 기분이 좋습니다.","저는 지금 물을 마시고 싶습니다."],"answer":"저는 지금 좀 쉬고 싶습니다.","explanation":"'피곤하다'는 몸이나 마음이 지쳐서 쉬고 싶은 상태를 의미합니다. '쉬고 싶다'와 의미가 비슷합니다."},{"id":"similar_meaning_027","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"작업장에서 용접 작업을 합니다.","choices":["작업장에서 밥을 먹습니다.","작업장에서 용접 일을 합니다.","작업장에서 휴식합니다.","작업장에서 회사에 갑니다."],"answer":"작업장에서 용접 일을 합니다.","explanation":"'작업을 하다'는 '일을 하다'와 같은 의미로 사용될 수 있습니다."},{"id":"similar_meaning_028","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"점심은 식당에서 먹어요.","choices":["식당에 안 가요.","식당에서 저녁을 먹어요.","식당에서 점심 식사를 해요.","식당이 없어요."],"answer":"식당에서 점심 식사를 해요.","explanation":"'밥을 먹다'와 '식사를 하다'는 같은 의미입니다."},{"id":"similar_meaning_029","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"허리가 너무 아파서 서있기 힘들어요.","choices":["허리가 괜찮습니다.","허리에 통증이 있습니다.","허리를 많이 움직이고 싶어요.","허리가 아프지만 괜찮습니다."],"answer":"허리에 통증이 있습니다.","explanation":"'아프다'는 '통증이 있다'와 같은 의미입니다."},{"id":"similar_meaning_030","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"저는 물을 마시고 싶어요.","choices":["저는 배가 고픕니다.","저는 목이 마릅니다.","저는 잠이 오지 않습니다.","저는 기분이 안 좋습니다."],"answer":"저는 목이 마릅니다.","explanation":"'물을 마시고 싶다'는 '목이 마르다'와 같은 의미입니다."},{"id":"similar_meaning_031","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"8시에 회사에 출근합니다.","choices":["8시에 회사에서 퇴근합니다.","8시에 회사로 갑니다.","8시에 회사에서 쉽니다.","8시에 회사에 밥을 먹습니다."],"answer":"8시에 회사로 갑니다.","explanation":"'출근하다'는 '회사에 가다'와 같은 의미입니다."},{"id":"similar_meaning_032","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"용접할 때는 항상 안전 장갑을 착용하세요.","choices":["용접할 때 안전 장갑은 필요 없어요.","용접할 때는 안전 장갑을 꼭 끼세요.","용접할 때 안전 장갑을 벗으세요.","용접할 때 안전 장갑을 사지 마세요."],"answer":"용접할 때는 안전 장갑을 꼭 끼세요.","explanation":"'착용하다'는 '끼다'와 같은 의미로, 장갑에 사용됩니다. '항상'과 '꼭'도 비슷한 의미입니다."},{"id":"similar_meaning_033","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"오늘 작업이 끝나서 정말 기쁩니다.","choices":["오늘 작업이 힘들었습니다.","오늘 작업이 슬펐습니다.","오늘 작업이 끝나서 행복합니다.","오늘 작업이 무서웠습니다."],"answer":"오늘 작업이 끝나서 행복합니다.","explanation":"'기쁘다'와 '행복하다'는 비슷한 의미의 감정 표현입니다."},{"id":"similar_meaning_034","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"저는 지금 시간이 없어서 밥을 못 먹어요.","choices":["저는 지금 밥을 안 먹어요.","저는 지금 밥을 먹을 수 없어요.","저는 지금 밥을 먹고 싶어요.","저는 지금 밥을 다 먹었어요."],"answer":"저는 지금 밥을 먹을 수 없어요.","explanation":"'못 ~하다'는 '~할 수 없다'와 같은 의미로, 어떤 행동을 할 능력이 없거나 상황이 안 될 때 사용합니다."},{"id":"similar_meaning_035","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"머리가 아파서 병원에 가려고 합니다.","choices":["머리가 아프지만 병원에 안 갈 거예요.","머리가 안 아파서 병원에 가요.","머리가 아파요. 그래서 병원에 가요.","머리가 아파도 병원에 갈 거예요."],"answer":"머리가 아파요. 그래서 병원에 가요.","explanation":"'A-아서/어서 B'는 'A. 그래서 B'와 같이 원인과 결과를 나타냅니다."},{"id":"similar_meaning_036","category":"비슷한 의미의 문장 고르기","category_key":"similar_meaning","color":"#6f42c1","question":"잠시 저기에서 쉬세요.","choices":["여기서 쉬지 마세요.","저기에서 잠깐 쉬십시오.","저기에서 일하세요.","저기에서 쉬고 싶어요."],"answer":"저기에서 잠깐 쉬십시오.","explanation":"'잠시'와 '잠깐'은 비슷한 의미이며, '-세요'와 '-십시오'는 모두 존댓말 명령형입니다."},{"id":"grammar_fill_037","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 공장___ 일합니다.","choices":["에서","에","으로","한테"],"answer":"에서","explanation":"행동이 일어나는 장소에는 조사 '에서'를 사용합니다."},{"id":"grammar_fill_038","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"이것___ 제 안전모예요.","choices":["이","가","은","를"],"answer":"은","explanation":"문장의 주된 화제를 나타낼 때 명사에 받침이 있으면 '은'을 사용합니다."},{"id":"grammar_fill_039","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 점심___ 먹어요.","choices":["이","은","을","에"],"answer":"을","explanation":"동사의 대상이 되는 목적어에 받침이 있으면 '을'을 사용합니다."},{"id":"grammar_fill_040","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"이 사람은 김반장님___.","choices":["입니다","입니까","이세요","이에요"],"answer":"입니다","explanation":"명사 뒤에 붙어 존댓말로 서술할 때 받침이 있으면 '입니다'를 사용합니다."},{"id":"grammar_fill_041","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"어제 많이 피곤___ 집에서 쉬었어요.","choices":["하다","했고","해서","하지만"],"answer":"해서","explanation":"앞 절이 뒤 절의 이유나 원인이 될 때 '-아서/어서'를 사용합니다."},{"id":"grammar_fill_042","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"작업장에서 안전모를 꼭 쓰___.","choices":["세요","아요","습니다","고 싶어요"],"answer":"세요","explanation":"상대방에게 존댓말로 어떤 행동을 하도록 명령하거나 권유할 때 동사 뒤에 '-(으)세요'를 사용합니다."},{"id":"grammar_fill_043","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 오늘 일이 많아서 쉬___.","choices":["지 않아요","지 못해요","안 쉬어요","못 쉬어요"],"answer":"지 못해요","explanation":"외부적 상황 때문에 어떤 행동을 할 수 없을 때 동사 뒤에 '-지 못하다'를 사용합니다."},{"id":"grammar_fill_044","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 배를 만들___ 기술자입니다.","choices":["고","지만","아서","거나"],"answer":"고","explanation":"두 개 이상의 동사를 연결하여 동작의 순서나 내용을 나열할 때 '-고'를 사용합니다."},{"id":"grammar_fill_045","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 고향에 돌아___.","choices":["고 싶어요","고 있어요","지 못해요","아세요"],"answer":"고 싶어요","explanation":"어떤 행동을 하고 싶다는 희망이나 바람을 나타낼 때 동사 뒤에 '-고 싶다'를 사용합니다."},{"id":"grammar_fill_046","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"김반장님은 지금 사무실___ 계세요.","choices":["에서","에","으로","한테"],"answer":"에","explanation":"사람이나 사물이 존재하는 장소를 나타낼 때 조사 '에'를 사용합니다."},{"id":"grammar_fill_047","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"저는 오늘 술을 ___ 마십니다.","choices":["안","못","지 않아요","지 못해요"],"answer":"안","explanation":"어떤 행동을 의도적으로 하지 않을 때 동사 앞에 부사 '안'을 사용합니다."},{"id":"grammar_fill_048","category":"적절한 문법 표현 넣기","category_key":"grammar_fill","color":"#28a745","question":"어제는 날씨가 좋___ 오늘은 비가 와요.","choices":["고","지만","아서","으면"],"answer":"지만","explanation":"앞 절의 내용과 뒤 절의 내용이 서로 대조되거나 반대될 때 동사나 형용사 뒤에 '-지만'을 사용합니다."},{"id":"sentence_connect_049","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"작업복을 입지 않았습니다. ___ 다리를 다쳤습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그래서","explanation":"'그래서'는 앞 문장의 원인이나 이유에 따른 결과를 나타낼 때 사용합니다."},{"id":"sentence_connect_050","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"이 일은 매우 힘듭니다. ___ 우리 모두 열심히 일합니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"하지만","explanation":"'하지만'은 앞 문장의 내용과 반대되거나 대조되는 내용을 연결할 때 사용합니다."},{"id":"sentence_connect_051","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"저는 아침에 밥을 먹었습니다. ___ 회사에 갔습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그리고","explanation":"'그리고'는 앞 문장의 내용에 이어서 다른 내용을 덧붙이거나 다음 행동을 연결할 때 사용합니다."},{"id":"sentence_connect_052","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"점심시간입니다. ___ 식당에 사람이 너무 많습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그런데","explanation":"'그런데'는 앞 문장과 관련 있지만 예상 밖의 사실이나 새로운 정보를 덧붙일 때 사용합니다."},{"id":"sentence_connect_053","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"머리가 많이 아픕니다. ___ 병원에 가야 합니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그래서","explanation":"'그래서'는 앞 문장의 원인이나 이유에 따른 결과를 나타낼 때 사용합니다."},{"id":"sentence_connect_054","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"용접 작업은 위험합니다. ___ 안전 수칙을 잘 지키면 괜찮습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"하지만","explanation":"'하지만'은 앞 문장의 내용과 반대되거나 대조되는 내용을 연결할 때 사용합니다."},{"id":"sentence_connect_055","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"여기는 작업장입니다. ___ 안전모를 꼭 써야 합니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그리고","explanation":"'그리고'는 앞 문장의 내용에 이어서 다른 내용을 덧붙이거나 다음 행동을 연결할 때 사용합니다."},{"id":"sentence_connect_056","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"지금 휴식 시간입니다. ___ 동료가 아직 일하고 있습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그런데","explanation":"'그런데'는 앞 문장과 관련 있지만 예상 밖의 사실이나 새로운 정보를 덧붙일 때 사용합니다."},{"id":"sentence_connect_057","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"안전 수칙을 잘 지키세요. ___ 사고가 나지 않습니다.","choices":["그래서","그러면","하지만","그리고"],"answer":"그러면","explanation":"'그러면'은 앞 문장의 내용이 조건이 되어 뒤 문장의 결과가 나타날 때 사용합니다."},{"id":"sentence_connect_058","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"점심으로 밥을 먹습니다. ___ 국수를 먹습니다.","choices":["그래서","그러면","하지만","또는"],"answer":"또는","explanation":"'또는'은 두 가지 이상의 선택지 중에서 하나를 고를 때 사용합니다."},{"id":"sentence_connect_059","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"오늘은 용접 작업이 많았습니다. ___ 퇴근 후에 많이 피곤했습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"그래서","explanation":"'그래서'는 앞 문장의 원인이나 이유에 따른 결과를 나타낼 때 사용합니다."},{"id":"sentence_connect_060","category":"문장 연결하기","category_key":"sentence_connect","color":"#fd7e14","question":"이 커피는 비쌉니다. ___ 맛은 아주 좋습니다.","choices":["그래서","그런데","하지만","그리고"],"answer":"하지만","explanation":"'하지만'은 앞 문장의 내용과 반대되거나 대조되는 내용을 연결할 때 사용합니다."}];
+
+const CAT_INFO = {
+  vocab_fill:       { name:'빈칸에 알맞은 어휘 넣기',   color:'#2e6da4', emoji:'📝' },
+  wrong_word:       { name:'잘못 사용한 어휘 찾기',     color:'#dc3545', emoji:'🔍' },
+  similar_meaning:  { name:'비슷한 의미의 문장 고르기', color:'#6f42c1', emoji:'💬' },
+  grammar_fill:     { name:'적절한 문법 표현 넣기',     color:'#28a745', emoji:'📐' },
+  sentence_connect: { name:'문장 연결하기',             color:'#fd7e14', emoji:'🔗' }
+};
+
+const HIST_KEY = 'quizHistory_v2';
+const PW_KEY   = 'teacherPw2';
+const DEFAULT_PW = 'samsung2025';
+
+// ══════════════════════════════════════════════
+// 인증
+// ══════════════════════════════════════════════
+function login() {
+  const pw = document.getElementById('pwInput').value;
+  const stored = localStorage.getItem(PW_KEY) || DEFAULT_PW;
+  if (pw === stored) {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('appWrap').classList.add('show');
+    renderAll();
+  } else {
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').placeholder = '비밀번호가 틀렸습니다';
+    document.getElementById('pwInput').style.borderColor = 'var(--danger)';
+    setTimeout(() => {
+      document.getElementById('pwInput').placeholder = '비밀번호 입력';
+      document.getElementById('pwInput').style.borderColor = '';
+    }, 2000);
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+});
+function logout() {
+  document.getElementById('appWrap').classList.remove('show');
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('pwInput').value = '';
+}
+function changePassword() {
+  const cur = document.getElementById('pwCur').value;
+  const nw  = document.getElementById('pwNew').value;
+  const stored = localStorage.getItem(PW_KEY) || DEFAULT_PW;
+  if (cur !== stored) { toast('현재 비밀번호가 틀렸습니다.'); return; }
+  if (nw.length < 4)  { toast('새 비밀번호는 4자 이상이어야 합니다.'); return; }
+  localStorage.setItem(PW_KEY, nw);
+  document.getElementById('pwCur').value = '';
+  document.getElementById('pwNew').value = '';
+  toast('비밀번호가 변경되었습니다.');
+}
+
+// ══════════════════════════════════════════════
+// 데이터
+// ══════════════════════════════════════════════
+function getHist() { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); }
+function saveHist(h) { localStorage.setItem(HIST_KEY, JSON.stringify(h)); }
+
+// ══════════════════════════════════════════════
+// 탭 전환
+// ══════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('show'));
+  document.querySelectorAll('.tnav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('show');
+  document.getElementById('tnav-' + name).classList.add('active');
+  if (name === 'students')  renderStudents();
+  if (name === 'analysis')  renderAnalysis();
+  if (name === 'questions') renderQuestions();
+}
+
+function renderAll() {
+  renderDashboard();
+}
+
+// ══════════════════════════════════════════════
+// 대시보드
+// ══════════════════════════════════════════════
+function renderDashboard() {
+  const hist = getHist();
+  const names = [...new Set(hist.map(r => r.name))];
+  const avg = hist.length ? Math.round(hist.reduce((s,r) => s+r.pct, 0) / hist.length) : 0;
+  const pass = hist.length ? Math.round(hist.filter(r => r.pct >= 70).length / hist.length * 100) : 0;
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${names.length}</div><div class="stat-lbl">학생 수</div></div>
+    <div class="stat-card"><div class="stat-val">${hist.length}</div><div class="stat-lbl">총 시험 횟수</div></div>
+    <div class="stat-card"><div class="stat-val">${avg}점</div><div class="stat-lbl">평균 점수</div></div>
+    <div class="stat-card"><div class="stat-val">${pass}%</div><div class="stat-lbl">합격률 (70점↑)</div></div>`;
+
+  // 카테고리별 정답률 차트
+  const catChart = document.getElementById('catChart');
+  if (!hist.length) { catChart.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>데이터 없음</div>'; }
+  else {
+    catChart.innerHTML = Object.entries(CAT_INFO).map(([key, info]) => {
+      const catRecs = hist.filter(r => r.categories && r.categories.includes(info.name));
+      if (!catRecs.length) return '';
+      const rate = Math.round(catRecs.reduce((s,r) => s+r.pct, 0) / catRecs.length);
+      return `<div class="bar-row">
+        <div class="bar-label">${info.emoji} ${info.name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${rate}%;background:${info.color}"></div></div>
+        <div class="bar-val" style="color:${info.color}">${rate}%</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 상위 10명
+  const byName = {};
+  hist.forEach(r => {
+    if (!byName[r.name]) byName[r.name] = { name:r.name, empId:r.empId||'', scores:[], count:0 };
+    byName[r.name].scores.push(r.pct);
+    byName[r.name].count++;
+  });
+  const top10 = Object.values(byName)
+    .map(s => ({ ...s, best: Math.max(...s.scores), avg: Math.round(s.scores.reduce((a,b)=>a+b,0)/s.scores.length) }))
+    .sort((a,b) => b.best - a.best).slice(0, 10);
+
+  document.getElementById('topBody').innerHTML = top10.length
+    ? top10.map((s,i) => `<tr>
+        <td><b>${i+1}</b></td><td>${s.name}</td><td style="color:var(--muted)">${s.empId}</td>
+        <td><b style="color:var(--primary)">${s.best}점</b></td><td>${s.avg}점</td><td>${s.count}회</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">데이터 없음</td></tr>';
+
+  // 최근 10건
+  document.getElementById('recentBody').innerHTML = hist.slice(0,10).map(r => {
+    const col = r.pct>=70?'var(--success)':r.pct>=50?'var(--warning)':'var(--danger)';
+    return `<tr>
+      <td><b>${r.name}</b></td><td style="color:var(--muted)">${r.empId||''}</td>
+      <td style="color:${col};font-weight:700">${r.pct}점</td>
+      <td>${r.correct}/${r.total}</td>
+      <td><span class="badge badge-${r.grade}">${r.grade}</span></td>
+      <td style="color:var(--muted);font-size:0.8rem">${r.date}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">데이터 없음</td></tr>';
+}
+
+// ══════════════════════════════════════════════
+// 학생 기록
+// ══════════════════════════════════════════════
+function renderStudents() {
+  const hist = getHist();
+  const q = document.getElementById('stuSearch').value.toLowerCase();
+  const g = document.getElementById('stuGrade').value;
+  const filtered = hist.filter(r =>
+    (!q || r.name.toLowerCase().includes(q) || (r.empId||'').includes(q)) &&
+    (!g || r.grade === g)
+  );
+
+  const empty = document.getElementById('stuEmpty');
+  const tbody = document.getElementById('stuBody');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  const col = p => p>=70?'var(--success)':p>=50?'var(--warning)':'var(--danger)';
+  tbody.innerHTML = filtered.map(r => `<tr>
+    <td><b>${r.name}</b></td>
+    <td style="color:var(--muted)">${r.empId||''}</td>
+    <td style="color:${col(r.pct)};font-weight:700">${r.pct}점</td>
+    <td>${r.correct}/${r.total}</td>
+    <td style="font-size:0.78rem;color:var(--muted)">${(r.categories||'').replace(/빈칸에 알맞은 어휘 넣기/g,'📝').replace(/잘못 사용한 어휘 찾기/g,'🔍').replace(/비슷한 의미의 문장 고르기/g,'💬').replace(/적절한 문법 표현 넣기/g,'📐').replace(/문장 연결하기/g,'🔗')}</td>
+    <td><span class="badge badge-${r.grade}">${r.grade}</span></td>
+    <td style="color:var(--muted);font-size:0.78rem">${r.date}</td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// 분석
+// ══════════════════════════════════════════════
+function renderAnalysis() {
+  const hist = getHist();
+  if (!hist.length) {
+    ['analysisStats','wrongRateChart','scoreDistChart','weakCatList'].forEach(id => {
+      document.getElementById(id).innerHTML = '<div class="empty"><div class="empty-icon">📭</div>데이터 없음</div>';
+    });
+    return;
+  }
+
+  // 통계 카드
+  const scores = hist.map(r => r.pct);
+  const mx = Math.max(...scores), mn = Math.min(...scores);
+  const med = scores.slice().sort((a,b)=>a-b)[Math.floor(scores.length/2)];
+  document.getElementById('analysisStats').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${mx}점</div><div class="stat-lbl">최고 점수</div></div>
+    <div class="stat-card"><div class="stat-val">${mn}점</div><div class="stat-lbl">최저 점수</div></div>
+    <div class="stat-card"><div class="stat-val">${med}점</div><div class="stat-lbl">중간값</div></div>
+    <div class="stat-card"><div class="stat-val">${hist.filter(r=>r.pct<70).length}명</div><div class="stat-lbl">70점 미만</div></div>`;
+
+  // 카테고리 오답률 (낮은 정답률 = 높은 오답률)
+  const catRates = Object.entries(CAT_INFO).map(([key, info]) => {
+    const catRecs = hist.filter(r => r.categories && r.categories.includes(info.name));
+    if (!catRecs.length) return null;
+    const rate = Math.round(catRecs.reduce((s,r)=>s+r.pct,0)/catRecs.length);
+    return { key, info, rate, wrong: 100 - rate };
+  }).filter(Boolean).sort((a,b) => b.wrong - a.wrong);
+
+  document.getElementById('wrongRateChart').innerHTML = catRates.map(c => `
+    <div class="bar-row">
+      <div class="bar-label">${c.info.emoji} ${c.info.name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${c.wrong}%;background:${c.info.color}"></div></div>
+      <div class="bar-val" style="color:${c.info.color}">${c.wrong}%</div>
+    </div>`).join('');
+
+  // 점수 분포 (0-49, 50-69, 70-89, 90-100)
+  const bands = [
+    { label:'90-100점', min:90, max:100, color:'#16a34a' },
+    { label:'70-89점',  min:70, max:89,  color:'#2563eb' },
+    { label:'50-69점',  min:50, max:69,  color:'#d97706' },
+    { label:'0-49점',   min:0,  max:49,  color:'#dc2626' }
+  ];
+  const maxBandCount = Math.max(...bands.map(b => hist.filter(r=>r.pct>=b.min&&r.pct<=b.max).length), 1);
+  document.getElementById('scoreDistChart').innerHTML = bands.map(b => {
+    const cnt = hist.filter(r=>r.pct>=b.min&&r.pct<=b.max).length;
+    const pct = Math.round(cnt/maxBandCount*100);
+    return `<div class="bar-row">
+      <div class="bar-label">${b.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${b.color}"></div></div>
+      <div class="bar-val" style="color:${b.color}">${cnt}명</div>
+    </div>`;
+  }).join('');
+
+  // 약한 카테고리 TOP 3
+  document.getElementById('weakCatList').innerHTML = catRates.slice(0,3).map((c,i) =>
+    `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:1.5rem">${['🥇','🥈','🥉'][i]}</span>
+      <div>
+        <div style="font-weight:700">${c.info.emoji} ${c.info.name}</div>
+        <div style="font-size:0.82rem;color:var(--muted)">평균 정답률 <b style="color:${c.info.color}">${c.rate}%</b> · 오답률 <b style="color:var(--danger)">${c.wrong}%</b></div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════
+// 문제 목록
+// ══════════════════════════════════════════════
+function renderQuestions() {
+  const q   = document.getElementById('qSearch').value.toLowerCase();
+  const cat = document.getElementById('qCat').value;
+  const filtered = QUIZ_DATA.filter(item =>
+    (!cat || item.category_key === cat) &&
+    (!q   || item.question.toLowerCase().includes(q) || item.answer.toLowerCase().includes(q))
+  );
+
+  document.getElementById('qCount').textContent = `총 ${filtered.length}문제`;
+  document.getElementById('qList').innerHTML = filtered.map(item => {
+    const info = CAT_INFO[item.category_key] || { color:'#666', emoji:'📝' };
+    const qHtml = item.question.replace(/\*\*(.+?)\*\*/g,
+      '<strong style="color:#dc2626;text-decoration:underline">$1</strong>');
+    return `<div class="q-card">
+      <div class="q-meta">
+        <span class="badge" style="background:${info.color}20;color:${info.color};border:1px solid ${info.color}40">${info.emoji} ${item.category}</span>
+        <span style="font-size:0.75rem;color:var(--muted)">#${item.id}</span>
+      </div>
+      <div class="q-text">${qHtml}</div>
+      <div class="q-choices">${item.choices.map(c =>
+        `<span class="q-choice${c===item.answer?' correct':''}">${c}</span>`
+      ).join('')}</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-top:6px">💡 ${item.explanation}</div>
+    </div>`;
+  }).join('') || '<div class="empty"><div class="empty-icon">🔍</div>검색 결과 없음</div>';
+}
+
+// ══════════════════════════════════════════════
+// CSV 내보내기
+// ══════════════════════════════════════════════
+function exportCSV() {
+  const hist = getHist();
+  if (!hist.length) { toast('내보낼 데이터가 없습니다.'); return; }
+  const rows = [['이름','사번','점수','정답/총문제','등급','카테고리','날짜']];
+  hist.forEach(r => rows.push([r.name, r.empId||'', r.pct+'%', `${r.correct}/${r.total}`, r.grade, r.categories||'', r.date]));
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `quiz_history_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function exportJSON() {
+  const hist = getHist();
+  if (!hist.length) { toast('내보낼 데이터가 없습니다.'); return; }
+  const blob = new Blob([JSON.stringify(hist, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `quiz_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+// ══════════════════════════════════════════════
+// CSV 가져오기
+// ══════════════════════════════════════════════
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => processCSVText(e.target.result);
+  reader.readAsText(file, 'utf-8');
+}
+function importCSVPaste() {
+  const text = document.getElementById('csvPaste').value.trim();
+  if (!text) { toast('CSV 내용을 붙여넣어 주세요.'); return; }
+  processCSVText(text);
+}
+function processCSVText(text) {
+  const lines = text.replace(/\r/g,'').split('\n').filter(Boolean);
+  if (lines.length < 2) { toast('유효한 CSV가 아닙니다.'); return; }
+  const existing = getHist();
+  const existingIds = new Set(existing.map(r => r.name + r.date));
+  let added = 0;
+  lines.slice(1).forEach(line => {
+    const cols = line.match(/"([^"]*)"/g);
+    if (!cols || cols.length < 7) return;
+    const [name, empId, pctStr, correct_total, grade, categories, date] =
+      cols.map(c => c.replace(/^"|"$/g,'').replace(/""/g,'"'));
+    const pct = parseInt(pctStr);
+    const [correct, total] = correct_total.split('/').map(Number);
+    const rec = { name, empId, pct, correct, total, grade, categories, date };
+    if (!existingIds.has(name + date)) { existing.push(rec); added++; }
+  });
+  saveHist(existing);
+  toast(`${added}건 가져왔습니다.`);
+  renderDashboard();
+  document.getElementById('csvPaste').value = '';
+}
+
+// ══════════════════════════════════════════════
+// 데이터 삭제
+// ══════════════════════════════════════════════
+function clearAll() {
+  if (!confirm('전체 학습 기록을 삭제하시겠습니까? 복구할 수 없습니다.')) return;
+  localStorage.removeItem(HIST_KEY);
+  renderDashboard();
+  toast('전체 기록이 삭제되었습니다.');
+}
+
+// ══════════════════════════════════════════════
+// 토스트 알림
+// ══════════════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.display = 'none', 2500);
+}
+</script>
+</body>
+</html>
