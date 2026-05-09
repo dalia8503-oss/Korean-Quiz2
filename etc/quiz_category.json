@@ -706,7 +706,7 @@
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
-    "question": "사장님께서 부르___ 제가 가야 합니다.",
+    "question": "반장님께서 부르___ 제가 가야 합니다.",
     "choices": [
       "셔서",
       "지만",
