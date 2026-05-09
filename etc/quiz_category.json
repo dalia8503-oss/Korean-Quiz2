@@ -192,7 +192,295 @@
     "subcategory": "의문사"
   },
   {
-    "id": "wrong_word_013",
+    "id": "vocab_fill_013",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "오늘 오전에 ___에서 용접 작업이 있습니다.",
+    "choices": [
+      "탱크",
+      "병원",
+      "학교",
+      "시장"
+    ],
+    "answer": "탱크",
+    "explanation": "용접 작업과 같은 현장 작업이 이루어지는 장소는 '탱크'입니다.",
+    "subcategory": "명사"
+  },
+  {
+    "id": "vocab_fill_014",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "작업 중에 다치면 빨리 ___에 가야 합니다.",
+    "choices": [
+      "병원",
+      "창고",
+      "식당",
+      "학교"
+    ],
+    "answer": "병원",
+    "explanation": "다치거나 아플 때 치료를 받으러 가는 곳은 '병원'입니다.",
+    "subcategory": "명사"
+  },
+  {
+    "id": "vocab_fill_015",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "작업 전에 ___을 입고 안전모를 썼습니다.",
+    "choices": [
+      "작업복",
+      "양복",
+      "운동복",
+      "잠옷"
+    ],
+    "answer": "작업복",
+    "explanation": "현장 작업을 할 때 입는 옷은 '작업복'입니다.",
+    "subcategory": "명사"
+  },
+  {
+    "id": "vocab_fill_016",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "(멀리 있는 안전모를 가리키며) ___은 제 안전모입니다.",
+    "choices": [
+      "저것",
+      "이것",
+      "그것",
+      "여기"
+    ],
+    "answer": "저것",
+    "explanation": "나와 상대방 모두에게서 멀리 있는 물건을 가리킬 때 '저것'을 사용합니다.",
+    "subcategory": "대명사"
+  },
+  {
+    "id": "vocab_fill_017",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "저는 지금 ___에서 일하고 있습니다. (내가 서 있는 작업 구역을 가리키며)",
+    "choices": [
+      "여기",
+      "거기",
+      "저기",
+      "이것"
+    ],
+    "answer": "여기",
+    "explanation": "내가 있는 장소를 가리킬 때 '여기'를 사용합니다.",
+    "subcategory": "대명사"
+  },
+  {
+    "id": "vocab_fill_018",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "(바로 옆에 서 있는 분을 소개하며) ___은 우리 반장님입니다.",
+    "choices": [
+      "이분",
+      "그분",
+      "저분",
+      "이것"
+    ],
+    "answer": "이분",
+    "explanation": "가까이 있는 사람을 높여 가리킬 때 '이분'을 사용합니다.",
+    "subcategory": "대명사"
+  },
+  {
+    "id": "vocab_fill_019",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "작업 전에 반드시 안전 장비를 ___합니다.",
+    "choices": [
+      "착용",
+      "정리",
+      "시작",
+      "운전"
+    ],
+    "answer": "착용",
+    "explanation": "안전 장비를 몸에 갖추어 입는 것을 '착용하다'라고 합니다.",
+    "subcategory": "동사"
+  },
+  {
+    "id": "vocab_fill_020",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "저는 매일 아침 7시 30분에 회사에 ___합니다.",
+    "choices": [
+      "출근",
+      "퇴근",
+      "청소",
+      "식사"
+    ],
+    "answer": "출근",
+    "explanation": "아침에 일하러 직장에 나가는 것을 '출근하다'라고 합니다.",
+    "subcategory": "동사"
+  },
+  {
+    "id": "vocab_fill_021",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "작업이 끝나면 장비 상태를 반드시 ___합니다.",
+    "choices": [
+      "확인",
+      "출근",
+      "용접",
+      "운반"
+    ],
+    "answer": "확인",
+    "explanation": "작업 후 장비 상태를 꼼꼼히 살펴보는 것을 '확인하다'라고 합니다.",
+    "subcategory": "동사"
+  },
+  {
+    "id": "vocab_fill_022",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "저 구역에 함부로 들어가면 ___. 출입을 삼가세요.",
+    "choices": [
+      "위험합니다",
+      "조용합니다",
+      "깨끗합니다",
+      "편합니다"
+    ],
+    "answer": "위험합니다",
+    "explanation": "함부로 들어가지 말라고 경고하는 상황에서는 '위험합니다'가 적절합니다.",
+    "subcategory": "형용사"
+  },
+  {
+    "id": "vocab_fill_023",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "이 장비는 너무 ___. 두 사람이 함께 들어야 합니다.",
+    "choices": [
+      "무겁습니다",
+      "가볍습니다",
+      "작습니다",
+      "좁습니다"
+    ],
+    "answer": "무겁습니다",
+    "explanation": "혼자 들기 어려울 정도로 무게가 많이 나가는 것을 '무겁다'라고 합니다.",
+    "subcategory": "형용사"
+  },
+  {
+    "id": "vocab_fill_024",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "오늘 처음 하는 작업이라 방법이 좀 ___.",
+    "choices": [
+      "어렵습니다",
+      "쉽습니다",
+      "빠릅니다",
+      "넓습니다"
+    ],
+    "answer": "어렵습니다",
+    "explanation": "처음 해 보는 일이라 익숙하지 않은 상태를 '어렵다'로 표현합니다.",
+    "subcategory": "형용사"
+  },
+  {
+    "id": "vocab_fill_025",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "작업 시간이 얼마 남지 않았으니 ___ 마무리하세요.",
+    "choices": [
+      "빨리",
+      "천천히",
+      "가끔",
+      "조용히"
+    ],
+    "answer": "빨리",
+    "explanation": "시간이 부족할 때 서두르라는 의미로 '빨리'를 사용합니다.",
+    "subcategory": "부사"
+  },
+  {
+    "id": "vocab_fill_026",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "무거운 자재는 동료와 ___ 드는 것이 안전합니다.",
+    "choices": [
+      "함께",
+      "빨리",
+      "가끔",
+      "조용히"
+    ],
+    "answer": "함께",
+    "explanation": "혼자 하지 않고 여럿이 같이 하는 것을 '함께'라고 합니다.",
+    "subcategory": "부사"
+  },
+  {
+    "id": "vocab_fill_027",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "오늘 처음 배우는 작업이니 설명을 ___ 따라오세요.",
+    "choices": [
+      "천천히",
+      "빨리",
+      "가끔",
+      "항상"
+    ],
+    "answer": "천천히",
+    "explanation": "처음 배울 때는 서두르지 않고 천천히 설명을 따라오는 것이 좋습니다.",
+    "subcategory": "부사"
+  },
+  {
+    "id": "vocab_fill_028",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "___ 오늘 야간 작업을 담당합니까?",
+    "choices": [
+      "누가",
+      "언제",
+      "어디",
+      "왜"
+    ],
+    "answer": "누가",
+    "explanation": "담당하는 사람을 물을 때 의문사 '누가'를 사용합니다.",
+    "subcategory": "의문사"
+  },
+  {
+    "id": "vocab_fill_029",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "작업 후 안전 장비는 ___ 보관합니까? (장소)",
+    "choices": [
+      "어디에",
+      "왜",
+      "누가",
+      "어떻게"
+    ],
+    "answer": "어디",
+    "explanation": "보관 장소를 물을 때 의문사 '어디'를 사용합니다.",
+    "subcategory": "의문사"
+  },
+  {
+    "id": "vocab_fill_030",
+    "category": "빈칸에 알맞은 어휘 넣기",
+    "category_key": "vocab_fill",
+    "color": "#2e6da4",
+    "question": "오늘 작업은 ___ 취소되었습니까? (이유/원인)",
+    "choices": [
+      "왜",
+      "언제",
+      "어디",
+      "어떻게"
+    ],
+    "answer": "왜",
+    "explanation": "이유나 원인을 물을 때 의문사 '왜'를 사용합니다.",
+    "subcategory": "의문사"
+  },
+  {
+    "id": "wrong_word_031",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -207,7 +495,7 @@
     "explanation": "안전 수칙은 '지키다'를 사용합니다."
   },
   {
-    "id": "wrong_word_014",
+    "id": "wrong_word_032",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -222,7 +510,7 @@
     "explanation": "점퍼와 같은 옷은 '쓰다'가 아니라 '입다'를 사용합니다."
   },
   {
-    "id": "wrong_word_015",
+    "id": "wrong_word_033",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -237,7 +525,7 @@
     "explanation": "회사에 늦지 않기 위해 아침에 하는 행동은 '자다'가 아니라 '일어나다'입니다."
   },
   {
-    "id": "wrong_word_016",
+    "id": "wrong_word_034",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -252,7 +540,7 @@
     "explanation": "물처럼 액체가 차가울 때는 '춥다'가 아니라 '차갑다'를 사용합니다."
   },
   {
-    "id": "wrong_word_017",
+    "id": "wrong_word_035",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -267,7 +555,7 @@
     "explanation": "화면 크기 때문에 보기가 힘들 때는 '얇다'가 아니라 '작다'를 사용합니다."
   },
   {
-    "id": "wrong_word_018",
+    "id": "wrong_word_036",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -282,7 +570,7 @@
     "explanation": "추울 때는 '선풍기'가 아니라 '히터(난방기)'를 켭니다. '에어컨'과 '선풍기'는 더울 때 사용합니다."
   },
   {
-    "id": "wrong_word_019",
+    "id": "wrong_word_037",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -297,7 +585,7 @@
     "explanation": "입을 데는(화상) 것은 음식이나 음료가 '차갑기' 때문이 아니라 '뜨겁기' 때문입니다."
   },
   {
-    "id": "wrong_word_020",
+    "id": "wrong_word_038",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -312,7 +600,7 @@
     "explanation": "복사기에서 서류를 출력할 때는 '마시다'가 아니라 '뽑다'를 사용합니다."
   },
   {
-    "id": "wrong_word_021",
+    "id": "wrong_word_039",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -327,7 +615,7 @@
     "explanation": "'조용히'와 '시끄럽다'는 반대되는 의미이므로 문맥에 맞게 '시끄럽게'를 사용해야 합니다."
   },
   {
-    "id": "wrong_word_022",
+    "id": "wrong_word_040",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -342,7 +630,7 @@
     "explanation": "바닥 때문에 넘어질 뻔한 상황에서는 '더럽다'보다는 '미끄럽다'가 적절합니다."
   },
   {
-    "id": "wrong_word_023",
+    "id": "wrong_word_041",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -357,7 +645,7 @@
     "explanation": "비가 올 때는 '안경'이 아니라 '우산'을 가져갑니다."
   },
   {
-    "id": "wrong_word_024",
+    "id": "wrong_word_042",
     "category": "잘못 사용한 어휘 찾기",
     "category_key": "wrong_word",
     "color": "#dc3545",
@@ -372,7 +660,7 @@
     "explanation": "뜨거운 물로 샤워를 하면 시원하지 않고 더워집니다. 시원함을 느끼려면 '차가운' 물로 샤워해야 합니다."
   },
   {
-    "id": "similar_meaning_025",
+    "id": "similar_meaning_043",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -387,7 +675,7 @@
     "explanation": "'꼭 먹는다'는 그 행동을 중요하게 생각한다는 의미와 비슷합니다."
   },
   {
-    "id": "similar_meaning_026",
+    "id": "similar_meaning_044",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -402,7 +690,7 @@
     "explanation": "'취소되다'는 예정되었던 일이 없어지거나 무효가 되는 것을 의미하며, '열리지 않는다'와 같은 의미입니다."
   },
   {
-    "id": "similar_meaning_027",
+    "id": "similar_meaning_045",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -417,7 +705,7 @@
     "explanation": "'위험한 곳'은 '사고가 자주 일어날 수 있는 곳'과 비슷한 의미입니다."
   },
   {
-    "id": "similar_meaning_028",
+    "id": "similar_meaning_046",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -432,7 +720,7 @@
     "explanation": "'피곤하다'는 몸이 힘들고 쉬고 싶은 상태를 의미합니다."
   },
   {
-    "id": "similar_meaning_029",
+    "id": "similar_meaning_047",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -447,7 +735,7 @@
     "explanation": "'-해야 한다'는 의무나 필요를 나타내며, '쓰지 않으면 안 된다'는 동일하게 의무를 나타냅니다."
   },
   {
-    "id": "similar_meaning_030",
+    "id": "similar_meaning_048",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -462,7 +750,7 @@
     "explanation": "'시장' 안에는 다양한 가게가 있고, '과일 가게'도 그중 하나이므로 의미가 비슷합니다."
   },
   {
-    "id": "similar_meaning_031",
+    "id": "similar_meaning_049",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -477,7 +765,7 @@
     "explanation": "'반드시 ~해야 한다'는 '필수 과정이다'와 같은 의미입니다."
   },
   {
-    "id": "similar_meaning_032",
+    "id": "similar_meaning_050",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -492,7 +780,7 @@
     "explanation": "'쌀쌀하다'는 약간 추운 날씨를 의미하며, 이는 '추워질 수 있다'와 '따뜻하게 입다'로 표현될 수 있습니다."
   },
   {
-    "id": "similar_meaning_033",
+    "id": "similar_meaning_051",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -507,7 +795,7 @@
     "explanation": "'서로 돕는 분위기'는 '서로 도와가며 일하는 것'을 의미합니다."
   },
   {
-    "id": "similar_meaning_034",
+    "id": "similar_meaning_052",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -522,7 +810,7 @@
     "explanation": "'몸이 좋지 않다'는 아프거나 불편한 상태를 의미하며, '감기 증상으로 불편함을 느낀다'와 비슷합니다."
   },
   {
-    "id": "similar_meaning_035",
+    "id": "similar_meaning_053",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -537,7 +825,7 @@
     "explanation": "'쉬는 것이 좋습니다'와 '쉬면 좋습니다'는 같은 의미입니다. 두 문장 모두 점심시간에 휴게실에서 쉬기를 권장합니다."
   },
   {
-    "id": "similar_meaning_036",
+    "id": "similar_meaning_054",
     "category": "비슷한 의미의 문장 고르기",
     "category_key": "similar_meaning",
     "color": "#6f42c1",
@@ -552,7 +840,7 @@
     "explanation": "'즉시 대피해야 한다'는 '즉시 안전한 곳으로 이동해야 한다'와 직접적으로 같은 의미입니다."
   },
   {
-    "id": "grammar_fill_037",
+    "id": "grammar_fill_055",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -567,7 +855,7 @@
     "explanation": "주어 명사에 받침이 있으면 주격 조사 '이'를 사용하고, 받침이 없으면 '가'를 사용합니다. '반장님'은 받침이 있으므로 '이'가 맞습니다."
   },
   {
-    "id": "grammar_fill_038",
+    "id": "grammar_fill_056",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -582,7 +870,7 @@
     "explanation": "목적어 명사에 받침이 있으면 목적격 조사 '을'을 사용하고, 받침이 없으면 '를'을 사용합니다. '안전장갑'은 받침이 있으므로 '을'이 맞습니다."
   },
   {
-    "id": "grammar_fill_039",
+    "id": "grammar_fill_057",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -597,7 +885,7 @@
     "explanation": "동작이나 행위가 일어나는 장소를 나타낼 때 조사 '에서'를 사용합니다."
   },
   {
-    "id": "grammar_fill_040",
+    "id": "grammar_fill_058",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -612,7 +900,7 @@
     "explanation": "이동 수단이나 방향을 나타낼 때 명사 뒤에 '-(으)로/로'를 사용합니다. 명사에 받침이 없거나 'ㄹ' 받침이면 '로'를, 다른 받침이면 '으로'를 사용합니다. '버스'는 받침이 없으므로 '로'가 맞습니다."
   },
   {
-    "id": "grammar_fill_041",
+    "id": "grammar_fill_059",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -627,7 +915,7 @@
     "explanation": "자신의 희망이나 바람을 나타낼 때 동사 뒤에 '-(고) 싶다'를 사용합니다."
   },
   {
-    "id": "grammar_fill_042",
+    "id": "grammar_fill_060",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -642,7 +930,7 @@
     "explanation": "어떤 목적을 가지고 이동할 때 동사 뒤에 '-(으)러 가다/오다'를 씁니다. '찾다'는 받침(ㅈ)이 있으므로 '으러'가 맞습니다. '-(으)러'는 반드시 가다/오다/다니다와 함께 씁니다."
   },
   {
-    "id": "grammar_fill_043",
+    "id": "grammar_fill_061",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -657,7 +945,7 @@
     "explanation": "어떤 조건이나 가정을 나타낼 때 동사나 형용사 뒤에 '-(으)면'을 사용합니다. '좋다'는 받침이 있으므로 '으면'이 맞습니다."
   },
   {
-    "id": "grammar_fill_044",
+    "id": "grammar_fill_062",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -672,7 +960,7 @@
     "explanation": "앞의 내용과 반대되거나 대조되는 내용을 연결할 때 동사나 형용사 뒤에 '-(으)지만'을 사용합니다. '힘들다'는 'ㄹ' 불규칙 동사이지만 '-지만'과 결합할 때는 어미 변화가 없습니다."
   },
   {
-    "id": "grammar_fill_045",
+    "id": "grammar_fill_063",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -687,7 +975,7 @@
     "explanation": "능력 부족이나 불가능을 나타낼 때 동사 앞에 '못'을 사용합니다. '하다' 동사는 '못 하다'로 사용됩니다."
   },
   {
-    "id": "grammar_fill_046",
+    "id": "grammar_fill_064",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -702,7 +990,7 @@
     "explanation": "미래의 계획이나 의지를 나타낼 때 동사 뒤에 '-(으)ㄹ 거예요'를 사용합니다. '나가다'는 받침이 없으므로 '나갈 거예요'가 맞습니다."
   },
   {
-    "id": "grammar_fill_047",
+    "id": "grammar_fill_065",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -717,7 +1005,7 @@
     "explanation": "존경의 대상을 높일 때 동사 뒤에 '-(으)시-'를 사용하고, 이유를 나타내는 '-어서'가 결합하여 '부르셔서'가 됩니다."
   },
   {
-    "id": "grammar_fill_048",
+    "id": "grammar_fill_066",
     "category": "적절한 문법 표현 넣기",
     "category_key": "grammar_fill",
     "color": "#28a745",
@@ -732,7 +1020,7 @@
     "explanation": "앞 절의 내용이 뒤 절에 대한 이유나 원인이 될 때 동사나 형용사 뒤에 '-(으)니까'를 사용합니다. (주로 명령문이나 청유문과 함께 쓰입니다.)"
   },
   {
-    "id": "sentence_connect_049",
+    "id": "sentence_connect_067",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -747,7 +1035,7 @@
     "explanation": "'그리고'는 앞 문장에 이어 다음 행동이나 사실을 나열할 때 사용합니다."
   },
   {
-    "id": "sentence_connect_050",
+    "id": "sentence_connect_068",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -762,7 +1050,7 @@
     "explanation": "'그런데'는 앞 문장과 다른, 예상치 못한 새로운 상황을 연결할 때 사용합니다."
   },
   {
-    "id": "sentence_connect_051",
+    "id": "sentence_connect_069",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -777,7 +1065,7 @@
     "explanation": "'그래서'는 앞 문장이 원인이 되어 뒤 문장의 결과나 판단으로 이어질 때 사용합니다."
   },
   {
-    "id": "sentence_connect_052",
+    "id": "sentence_connect_070",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -792,7 +1080,7 @@
     "explanation": "'그러면'은 앞 문장이 조건이 되어 뒤 문장의 결과나 권유가 이어질 때 사용합니다."
   },
   {
-    "id": "sentence_connect_053",
+    "id": "sentence_connect_071",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -807,7 +1095,7 @@
     "explanation": "'그래서'는 앞 문장이 원인이 되어 뒤 문장의 결과로 이어질 때 사용합니다. 날씨가 더웠기 때문에 물을 많이 마신 것입니다."
   },
   {
-    "id": "sentence_connect_054",
+    "id": "sentence_connect_072",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -822,7 +1110,7 @@
     "explanation": "'하지만'은 앞 문장의 내용과 뒤 문장의 내용이 서로 반대이거나 대조될 때 사용합니다."
   },
   {
-    "id": "sentence_connect_055",
+    "id": "sentence_connect_073",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -837,7 +1125,7 @@
     "explanation": "'그런데'는 앞 문장과 관련하여 예상치 못한 새로운 상황을 연결할 때 사용합니다. 안전모를 가져왔는데도 그 위치를 모르는 상황입니다."
   },
   {
-    "id": "sentence_connect_056",
+    "id": "sentence_connect_074",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -852,7 +1140,7 @@
     "explanation": "'하지만'은 앞 문장과 반대되거나 예상하지 못한 내용이 뒤에 이어질 때 사용합니다."
   },
   {
-    "id": "sentence_connect_057",
+    "id": "sentence_connect_075",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -867,7 +1155,7 @@
     "explanation": "'그러면'은 앞 문장이 조건이 될 때 사용합니다. 일찍 퇴근하는 것이 조건이 되어 빨리 낫는 결과가 이어집니다."
   },
   {
-    "id": "sentence_connect_058",
+    "id": "sentence_connect_076",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -882,7 +1170,7 @@
     "explanation": "'그러면'은 앞 문장의 내용이 조건이 되어 뒤 문장의 결과나 효과가 나타날 때 사용합니다."
   },
   {
-    "id": "sentence_connect_059",
+    "id": "sentence_connect_077",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
@@ -897,7 +1185,7 @@
     "explanation": "'그리고'는 앞 문장에 이어 다음 사실이나 행동을 나열할 때 사용합니다. 작업복을 입고 안전모도 착용한 행동의 나열입니다."
   },
   {
-    "id": "sentence_connect_060",
+    "id": "sentence_connect_078",
     "category": "문장 연결하기",
     "category_key": "sentence_connect",
     "color": "#fd7e14",
