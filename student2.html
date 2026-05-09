@@ -145,6 +145,10 @@
     /* ── 모달 ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
     .modal-overlay.open { display: flex; }
+    .report-btn { background: none; border: 1px solid #fca5a5; color: #dc2626; border-radius: 8px; padding: 4px 10px; font-size: 0.78rem; cursor: pointer; margin-top: 8px; }
+    .report-btn:hover { background: #fff1f1; }
+    .report-btn:disabled { opacity: 0.5; cursor: default; }
+    .report-reason label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; padding: 6px 0; }
     .modal-box { background: #fff; border-radius: 20px; padding: 24px; width: 100%; max-width: 400px; }
     .modal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
     .modal-close { float: right; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); }
@@ -170,6 +174,25 @@
   </style>
 </head>
 <body>
+
+<!-- 신고 모달 -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeReportModal()">✕</button>
+    <div class="modal-title">⚠️ AI 문제 신고</div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;">문제의 오류를 알려주세요. 교사에게 전달됩니다.</p>
+    <div class="report-reason" style="margin-bottom:12px;">
+      <label><input type="radio" name="rr" value="wrong_answer"> 정답이 틀렸어요</label>
+      <label><input type="radio" name="rr" value="bad_question"> 문제 내용이 이상해요</label>
+      <label><input type="radio" name="rr" value="bad_korean"> 한국어가 어색해요</label>
+      <label><input type="radio" name="rr" value="bad_explanation"> 해설이 맞지 않아요</label>
+      <label><input type="radio" name="rr" value="other"> 기타</label>
+    </div>
+    <textarea id="reportComment" placeholder="추가 의견 (선택사항)" rows="3"
+      style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;resize:none;margin-bottom:12px;font-family:inherit;"></textarea>
+    <button class="btn btn-danger" style="width:100%;" onclick="submitReport()">신고 제출</button>
+  </div>
+</div>
 
 <!-- API 키 설정 모달 -->
 <div class="modal-overlay" id="keyModal">
@@ -706,7 +729,10 @@ ${catDesc}
   }
 }
 
+let _generatedQuestions = [];
+
 function renderAIQuestions(generated) {
+  _generatedQuestions = generated;
   const card = document.getElementById('aiCard');
   const list = document.getElementById('aiList');
   card.style.display = 'block';
@@ -734,11 +760,62 @@ function renderAIQuestions(generated) {
       <div class="ai-quiz-badge" style="color:${cat.color}">${cat.emoji} ${cat.name} · 유사문제 ${qi+1}</div>
       <div class="ai-quiz-q">${qHtml}</div>
       <div id="ai-choices-${qi}">${choicesHtml}</div>
-      <div class="ai-exp" id="ai-exp-${qi}"></div>`;
+      <div class="ai-exp" id="ai-exp-${qi}"></div>
+      <div style="text-align:right;margin-top:6px;">
+        <button class="report-btn" id="report-btn-${qi}" onclick="openReportModal(${qi})">⚠️ 문제 신고</button>
+      </div>`;
     list.appendChild(div);
   });
 
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ══════════════════════════════════════════════
+// AI 문제 신고
+// ══════════════════════════════════════════════
+let _reportTargetIdx = null;
+
+function openReportModal(qi) {
+  _reportTargetIdx = qi;
+  document.querySelectorAll('input[name="rr"]').forEach(r => r.checked = false);
+  document.getElementById('reportComment').value = '';
+  document.getElementById('reportModal').classList.add('open');
+}
+function closeReportModal() { document.getElementById('reportModal').classList.remove('open'); }
+
+function submitReport() {
+  if (_reportTargetIdx === null) return;
+  const reason = document.querySelector('input[name="rr"]:checked')?.value;
+  if (!reason) { alert('신고 이유를 선택해주세요.'); return; }
+  const q = _generatedQuestions[_reportTargetIdx];
+  const reasonLabel = { wrong_answer:'정답 오류', bad_question:'문제 내용 이상', bad_korean:'어색한 한국어', bad_explanation:'해설 오류', other:'기타' };
+  const report = {
+    id: Date.now().toString(),
+    question: q.question, category: q.category, answer: q.answer,
+    reason, reasonLabel: reasonLabel[reason] || reason,
+    comment: document.getElementById('reportComment').value.trim(),
+    reporter: studentName || '익명',
+    date: new Date().toLocaleString('ko-KR')
+  };
+  const reports = JSON.parse(localStorage.getItem('aiQuizReports') || '[]');
+  reports.unshift(report);
+  localStorage.setItem('aiQuizReports', JSON.stringify(reports.slice(0, 200)));
+  sendReportToSheet(report);
+  closeReportModal();
+  const btn = document.getElementById(`report-btn-${_reportTargetIdx}`);
+  if (btn) { btn.textContent = '✅ 신고 완료'; btn.disabled = true; }
+  _reportTargetIdx = null;
+}
+
+async function sendReportToSheet(report) {
+  if (!GOOGLE_SCRIPT_URL) return;
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'aiReport', ...report })
+    });
+  } catch(_) {}
 }
 
 function selectAIChoice(btn, qi) {

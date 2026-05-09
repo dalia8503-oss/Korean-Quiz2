@@ -145,6 +145,7 @@
     <button class="tnav-btn" onclick="switchTab('students')" id="tnav-students">👥 학생 기록</button>
     <button class="tnav-btn" onclick="switchTab('analysis')" id="tnav-analysis">📈 분석</button>
     <button class="tnav-btn" onclick="switchTab('questions')" id="tnav-questions">📝 문제 목록</button>
+    <button class="tnav-btn" onclick="switchTab('reports')" id="tnav-reports">⚠️ 신고 <span id="reportBadge" style="display:none;background:#dc2626;color:#fff;border-radius:99px;padding:1px 6px;font-size:0.72rem;margin-left:4px;"></span></button>
     <button class="tnav-btn" onclick="switchTab('settings')" id="tnav-settings">⚙️ 설정</button>
   </div>
 
@@ -223,6 +224,25 @@
     </div>
     <div id="qCount" style="font-size:0.85rem;color:var(--muted);margin-bottom:10px;"></div>
     <div id="qList"></div>
+  </div>
+
+  <!-- 신고 목록 -->
+  <div class="tab-content" id="tab-reports">
+    <div class="card" style="padding:14px 16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span style="font-weight:700;">AI 문제 신고 목록</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select id="reportFilter" onchange="renderReports()" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;">
+            <option value="">전체</option>
+            <option value="pending">미확인</option>
+            <option value="resolved">확인 완료</option>
+          </select>
+          <button class="btn btn-gray btn-sm" onclick="clearResolvedReports()">확인 완료 삭제</button>
+        </div>
+      </div>
+    </div>
+    <div id="reportList"></div>
+    <div id="reportEmpty" class="empty" style="display:none;"><div class="empty-icon">✅</div>신고가 없습니다</div>
   </div>
 
   <!-- 설정 -->
@@ -345,10 +365,83 @@ function switchTab(name) {
   if (name === 'students')  renderStudents();
   if (name === 'analysis')  renderAnalysis();
   if (name === 'questions') renderQuestions();
+  if (name === 'reports')   renderReports();
 }
+
+const REPORT_KEY = 'aiQuizReports';
+
+function getReports() { return JSON.parse(localStorage.getItem(REPORT_KEY) || '[]'); }
+function saveReports(r) { localStorage.setItem(REPORT_KEY, JSON.stringify(r)); }
 
 function renderAll() {
   renderDashboard();
+  updateReportBadge();
+}
+
+function updateReportBadge() {
+  const pending = getReports().filter(r => !r.resolved).length;
+  const badge = document.getElementById('reportBadge');
+  if (badge) {
+    badge.style.display = pending ? 'inline' : 'none';
+    badge.textContent = pending;
+  }
+}
+
+function renderReports() {
+  const filter = document.getElementById('reportFilter')?.value || '';
+  let reports = getReports();
+  if (filter === 'pending')  reports = reports.filter(r => !r.resolved);
+  if (filter === 'resolved') reports = reports.filter(r => r.resolved);
+
+  const list  = document.getElementById('reportList');
+  const empty = document.getElementById('reportEmpty');
+
+  if (!reports.length) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.innerHTML = reports.map(r => `
+    <div class="card" style="padding:14px 16px;border-left:4px solid ${r.resolved ? '#16a34a' : '#dc2626'};">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <span class="badge" style="background:${r.resolved ? '#dcfce7' : '#fee2e2'};color:${r.resolved ? '#16a34a' : '#dc2626'};">
+          ${r.resolved ? '✅ 확인 완료' : '🔴 미확인'}
+        </span>
+        <span style="font-size:0.78rem;color:var(--muted)">${r.date}</span>
+      </div>
+      <div style="font-weight:700;margin-bottom:4px;font-size:0.9rem;">신고 유형: ${r.reasonLabel || r.reason}</div>
+      <div style="font-size:0.85rem;margin-bottom:4px;"><b>문제:</b> ${r.question}</div>
+      <div style="font-size:0.85rem;margin-bottom:4px;"><b>정답:</b> ${r.answer} &nbsp;·&nbsp; <b>카테고리:</b> ${r.category || '-'}</div>
+      ${r.comment ? `<div style="font-size:0.85rem;background:#f8fafc;border-radius:6px;padding:6px 10px;margin-bottom:8px;"><b>의견:</b> ${r.comment}</div>` : ''}
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:10px;">신고자: ${r.reporter}</div>
+      <div style="display:flex;gap:8px;">
+        ${!r.resolved
+          ? `<button class="btn btn-sm" style="background:#dcfce7;color:#16a34a;" onclick="resolveReport('${r.id}')">✅ 확인 완료</button>`
+          : `<button class="btn btn-sm btn-gray" onclick="unresolveReport('${r.id}')">↩ 미확인으로</button>`}
+        <button class="btn btn-sm btn-gray" onclick="deleteReport('${r.id}')">🗑 삭제</button>
+      </div>
+    </div>`).join('');
+}
+
+function resolveReport(id) {
+  const reports = getReports().map(r => r.id === id ? { ...r, resolved: true } : r);
+  saveReports(reports); renderReports(); updateReportBadge();
+}
+function unresolveReport(id) {
+  const reports = getReports().map(r => r.id === id ? { ...r, resolved: false } : r);
+  saveReports(reports); renderReports(); updateReportBadge();
+}
+function deleteReport(id) {
+  if (!confirm('이 신고를 삭제할까요?')) return;
+  saveReports(getReports().filter(r => r.id !== id));
+  renderReports(); updateReportBadge();
+}
+function clearResolvedReports() {
+  if (!confirm('확인 완료된 신고를 모두 삭제할까요?')) return;
+  saveReports(getReports().filter(r => !r.resolved));
+  renderReports(); updateReportBadge();
 }
 
 // ══════════════════════════════════════════════
