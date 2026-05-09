@@ -177,7 +177,10 @@
     <button class="modal-close" onclick="closeKeyModal()">✕</button>
     <div class="modal-title">🔑 Gemini API 키 설정</div>
     <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;">AI 유사문제 생성에 사용됩니다. 키는 이 기기에만 저장됩니다.</p>
-    <input type="text" id="keyInput" placeholder="AIzaSy..." style="font-size:0.85rem;">
+    <div id="builtinKeyHint" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;font-size:0.82rem;color:#16a34a;margin-bottom:10px;">
+      ✅ 서버에 저장된 키가 자동으로 사용됩니다. 직접 입력 시 우선 적용됩니다.
+    </div>
+    <input type="text" id="keyInput" placeholder="AIzaSy... (선택 사항)" style="font-size:0.85rem;">
     <div style="display:flex;gap:8px;">
       <button class="btn btn-primary btn-sm" style="flex:1;margin-bottom:0" onclick="saveKey()">저장</button>
       <button class="btn btn-gray btn-sm" style="flex:1;margin-bottom:0" onclick="clearKey()">삭제</button>
@@ -356,11 +359,16 @@ let sessionId = null;
 // 초기화
 // ══════════════════════════════════════════════
 // ══════════════════════════════════════════════
-// API 키 설정 모달
+// API 키 설정
+// __GEMINI_API_KEY__ → 배포 시 GitHub Actions가 실제 키로 교체
 // ══════════════════════════════════════════════
+const _BUILT_IN_KEY = '__GEMINI_API_KEY__';
+const _hasBuiltIn = !_BUILT_IN_KEY.startsWith('__');
+
 function getApiKey() {
   return localStorage.getItem('geminiApiKey') ||
-    (typeof CONFIG !== 'undefined' && CONFIG.GEMINI_API_KEY) || '';
+    (_hasBuiltIn ? _BUILT_IN_KEY : '') ||
+    (typeof CONFIG !== 'undefined' ? CONFIG.GEMINI_API_KEY : '') || '';
 }
 function updateKeyBadge() {
   const badge = document.getElementById('keyStatusBadge');
@@ -371,6 +379,8 @@ function updateKeyBadge() {
 }
 function openKeyModal() {
   document.getElementById('keyInput').value = localStorage.getItem('geminiApiKey') || '';
+  const hint = document.getElementById('builtinKeyHint');
+  if (hint) hint.style.display = _hasBuiltIn ? 'block' : 'none';
   document.getElementById('keyModal').classList.add('open');
 }
 function closeKeyModal() { document.getElementById('keyModal').classList.remove('open'); }
