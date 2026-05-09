@@ -130,7 +130,7 @@
     <label>비밀번호</label>
     <input type="password" id="pwInput" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
     <button class="btn btn-primary" style="width:100%;margin-top:12px;padding:14px;" onclick="login()">로그인</button>
-    <p style="font-size:0.78rem;color:var(--muted);text-align:center;margin-top:12px;">기본 비밀번호: <b>samsung2025</b></p>
+    <p style="font-size:0.78rem;color:var(--muted);text-align:center;margin-top:12px;">관리자 문의: 비밀번호를 모르시면 담당자에게 연락하세요</p>
   </div>
 </div>
 
@@ -277,15 +277,22 @@ const CAT_INFO = {
 
 const HIST_KEY = 'quizHistory_v2';
 const PW_KEY   = 'teacherPw2';
-const DEFAULT_PW = 'samsung2025';
+// SHA-256('global2026') — 평문 비밀번호는 소스에 없음
+const DEFAULT_PW_HASH = 'ae12bd8f5543f2f2d6844dfa694fdb5570687f347d36c95be20a8ff5efa9c263';
+
+async function hashPw(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 // ══════════════════════════════════════════════
 // 인증
 // ══════════════════════════════════════════════
-function login() {
+async function login() {
   const pw = document.getElementById('pwInput').value;
-  const stored = localStorage.getItem(PW_KEY) || DEFAULT_PW;
-  if (pw === stored) {
+  const stored = localStorage.getItem(PW_KEY) || DEFAULT_PW_HASH;
+  const hashed = await hashPw(pw);
+  if (hashed === stored) {
     document.getElementById('loginWrap').style.display = 'none';
     document.getElementById('appWrap').classList.add('show');
     renderAll();
@@ -307,13 +314,15 @@ function logout() {
   document.getElementById('loginWrap').style.display = 'flex';
   document.getElementById('pwInput').value = '';
 }
-function changePassword() {
+async function changePassword() {
   const cur = document.getElementById('pwCur').value;
   const nw  = document.getElementById('pwNew').value;
-  const stored = localStorage.getItem(PW_KEY) || DEFAULT_PW;
-  if (cur !== stored) { toast('현재 비밀번호가 틀렸습니다.'); return; }
-  if (nw.length < 4)  { toast('새 비밀번호는 4자 이상이어야 합니다.'); return; }
-  localStorage.setItem(PW_KEY, nw);
+  const stored = localStorage.getItem(PW_KEY) || DEFAULT_PW_HASH;
+  const hashedCur = await hashPw(cur);
+  if (hashedCur !== stored) { toast('현재 비밀번호가 틀렸습니다.'); return; }
+  if (nw.length < 4) { toast('새 비밀번호는 4자 이상이어야 합니다.'); return; }
+  const hashedNew = await hashPw(nw);
+  localStorage.setItem(PW_KEY, hashedNew);
   document.getElementById('pwCur').value = '';
   document.getElementById('pwNew').value = '';
   toast('비밀번호가 변경되었습니다.');
