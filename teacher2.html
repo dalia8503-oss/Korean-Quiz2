@@ -154,6 +154,21 @@
 
   <!-- 대시보드 -->
   <div class="tab-content show" id="tab-dashboard">
+    <div class="filter-row">
+      <select id="dashTeam" onchange="renderDashboard()">
+        <option value="">전체 팀</option>
+        <option value="LNG선공사팀">LNG선공사팀</option>
+        <option value="기타">기타(팀)</option>
+      </select>
+      <select id="dashDept" onchange="renderDashboard()">
+        <option value="">전체 부/과</option>
+        <option value="1부5과">1부5과</option>
+        <option value="2부3과">2부3과</option>
+        <option value="3부의장과">3부의장과</option>
+        <option value="기타">기타(과)</option>
+      </select>
+      <span id="dashFilterLabel" style="font-size:0.82rem;color:var(--muted);margin-left:4px;"></span>
+    </div>
     <div class="section-row" id="dashStats"></div>
     <div class="card">
       <div class="card-title">📂 카테고리별 평균 정답률</div>
@@ -580,7 +595,17 @@ function clearResolvedReports() {
 // 대시보드
 // ══════════════════════════════════════════════
 function renderDashboard() {
-  const hist = getHist();
+  const all = getHist();
+  const t = document.getElementById('dashTeam')?.value || '';
+  const d = document.getElementById('dashDept')?.value || '';
+  const hist = all.filter(r => (!t || r.team === t) && (!d || r.dept === d));
+
+  const label = document.getElementById('dashFilterLabel');
+  if (label) {
+    const parts = [t, d].filter(Boolean);
+    label.textContent = parts.length ? `· ${parts.join(' / ')} 기준` : '';
+  }
+
   const names = [...new Set(hist.map(r => r.name))];
   const avg = hist.length ? Math.round(hist.reduce((s,r) => s+r.pct, 0) / hist.length) : 0;
   const pass = hist.length ? Math.round(hist.filter(r => r.pct >= 70).length / hist.length * 100) : 0;
