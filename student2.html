@@ -351,27 +351,15 @@
     <button class="back-btn" onclick="showScreen('screenStart')">←</button>
     <h2 style="margin:0;">📊 학습 이력</h2>
   </div>
-  <div class="tab-bar" style="display:none;">
-    <button class="tab-btn active" onclick="switchTab('mine')" id="tabMine">내 기록</button>
-    <button class="tab-btn" onclick="switchTab('all')" id="tabAll">전체 학생</button>
-  </div>
   <div id="tabContentMine">
     <div id="myNameInfo" class="card" style="display:none;padding:12px 16px;"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
+      <button class="btn btn-outline btn-sm" id="cloudRefreshBtn" onclick="refreshFromCloud()" style="display:none;">☁️ 클라우드 불러오기</button>
+      <button class="btn btn-danger btn-sm" onclick="openClearModal()">🗑 전체 초기화</button>
+    </div>
     <div id="myHistoryList"></div>
   </div>
-  <div id="tabContentAll" style="display:none !important;">
-    <div class="card" style="padding:12px 16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <span style="font-weight:700;">전체 학생 기록</span>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV 다운로드</button>
-          <button class="btn btn-outline btn-sm" id="cloudRefreshBtn" onclick="refreshFromCloud()" style="display:none;">☁️ 클라우드 불러오기</button>
-          <button class="btn btn-danger btn-sm" onclick="openClearModal()">🗑 전체 초기화</button>
-        </div>
-      </div>
-    </div>
-    <div id="allHistoryList"></div>
-  </div>
+  <div id="tabContentAll" style="display:none;"></div>
 </div>
 
 <script>
@@ -1056,13 +1044,7 @@ function histCard(r) {
   </div>`;
 }
 
-function switchTab(tab) {
-  const mine = tab === 'mine';
-  document.getElementById('tabContentMine').style.display = mine ? '' : 'none';
-  document.getElementById('tabContentAll').style.display = mine ? 'none' : '';
-  document.getElementById('tabMine').classList.toggle('active', mine);
-  document.getElementById('tabAll').classList.toggle('active', !mine);
-}
+function switchTab(tab) { /* 전체 학생 탭 제거됨 */ }
 
 function exportCSV() {
   const hist = JSON.parse(localStorage.getItem('quizHistory_v2') || '[]');
