@@ -285,7 +285,7 @@
     <button class="btn btn-outline" onclick="showScreen('screenHistory')">📊 학습 이력 보기</button>
   </div>
   <p style="text-align:center;font-size:0.8rem;color:var(--muted);">☁️ 학습 데이터는 클라우드와 이 기기에 함께 저장됩니다</p>
-  <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:2px;">v2026.05.10</p>
+  <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:2px;" id="versionLine">v2026.05.10</p>
 </div>
 
 <!-- ══════════════════ 화면 2: 퀴즈 ══════════════════ -->
@@ -975,7 +975,7 @@ function saveHistory(correct, total, pct, grade) {
     sessionId, name: studentName, empId, team, dept,
     correct, total, pct, grade,
     categories: [...new Set(quizQuestions.map(q => q.category))].join(', '),
-    date: new Date().toLocaleString('ko-KR')
+    date: (() => { const n = new Date(), p = x => String(x).padStart(2,'0'); return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}`; })()
   };
   const key = 'quizHistory_v2';
   const hist = JSON.parse(localStorage.getItem(key) || '[]');
@@ -1020,7 +1020,8 @@ async function refreshFromCloud() {
 }
 
 function _applyHistUI(hist, name) {
-  const myRec = name ? hist.filter(r => r.name === name) : [];
+  const sorted = [...hist].sort((a, b) => Number(b.sessionId || 0) - Number(a.sessionId || 0));
+  const myRec = name ? sorted.filter(r => r.name === name) : [];
   const myEl = document.getElementById('myHistoryList');
   const nameInfo = document.getElementById('myNameInfo');
   if (name) {
@@ -1031,8 +1032,8 @@ function _applyHistUI(hist, name) {
     ? myRec.map(r => histCard(r)).join('')
     : '<div class="empty-state"><div class="empty-icon">📭</div>기록이 없어요</div>';
   const allEl = document.getElementById('allHistoryList');
-  if (allEl) allEl.innerHTML = hist.length
-    ? hist.map(r => histCard(r)).join('')
+  if (allEl) allEl.innerHTML = sorted.length
+    ? sorted.map(r => histCard(r)).join('')
     : '<div class="empty-state"><div class="empty-icon">📭</div>기록이 없어요</div>';
 }
 
@@ -1099,6 +1100,12 @@ async function sendToSheet(correct, total, pct, grade) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => reg.update()).catch(() => {});
 }
+(function() {
+  const vEl = document.getElementById('versionLine');
+  if (!vEl) return;
+  const n = new Date(), p = x => String(x).padStart(2, '0');
+  vEl.textContent = `v2026.05.10 ${p(n.getHours())}:${p(n.getMinutes())}`;
+})();
 </script>
 </body>
 </html>
