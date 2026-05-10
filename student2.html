@@ -365,6 +365,7 @@
         <span style="font-weight:700;">전체 학생 기록</span>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV 다운로드</button>
+          <button class="btn btn-outline btn-sm" id="cloudRefreshBtn" onclick="refreshFromCloud()" style="display:none;">☁️ 클라우드 불러오기</button>
           <button class="btn btn-danger btn-sm" onclick="openClearModal()">🗑 전체 초기화</button>
         </div>
       </div>
@@ -992,6 +993,15 @@ async function renderHistory() {
   const localHist = JSON.parse(localStorage.getItem(key) || '[]');
   _applyHistUI(localHist, name);
 
+  const refreshBtn = document.getElementById('cloudRefreshBtn');
+
+  // 초기화 후에는 클라우드 자동 재요청을 막는다
+  if (localStorage.getItem('histCleared') === '1') {
+    if (refreshBtn) refreshBtn.style.display = '';
+    return;
+  }
+  if (refreshBtn) refreshBtn.style.display = 'none';
+
   if (!GOOGLE_SCRIPT_URL) return;
   try {
     const myEl = document.getElementById('myHistoryList');
@@ -1003,6 +1013,14 @@ async function renderHistory() {
     localStorage.setItem(key, JSON.stringify(cloud.slice(0, 200)));
     _applyHistUI(cloud, name);
   } catch(_) {}
+}
+
+async function refreshFromCloud() {
+  localStorage.removeItem('histCleared');
+  const btn = document.getElementById('cloudRefreshBtn');
+  if (btn) { btn.textContent = '☁️ 불러오는 중...'; btn.disabled = true; }
+  await renderHistory();
+  if (btn) { btn.textContent = '☁️ 클라우드 불러오기'; btn.disabled = false; }
 }
 
 function _applyHistUI(hist, name) {
@@ -1059,10 +1077,11 @@ function exportCSV() {
 
 function clearAllData() {
   localStorage.removeItem('quizHistory_v2');
-  // renderHistory()를 호출하면 GAS 클라우드에서 데이터를 다시 받아와 복구되므로
-  // 직접 빈 배열로 UI를 갱신한다.
+  localStorage.setItem('histCleared', '1'); // 클라우드 자동 복구 차단 플래그
   const name = localStorage.getItem('lastStudentName') || '';
   _applyHistUI([], name);
+  const btn = document.getElementById('cloudRefreshBtn');
+  if (btn) btn.style.display = '';
 }
 
 // ══════════════════════════════════════════════
