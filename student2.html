@@ -1020,8 +1020,37 @@ async function refreshFromCloud() {
   if (btn) { btn.textContent = '☁️ 클라우드 불러오기'; btn.disabled = false; }
 }
 
+function _histTs(r) {
+  if (r.sessionId) return Number(r.sessionId);
+  if (!r.date) return 0;
+  // 새 형식: "2026-05-10 14:30"
+  const n = r.date.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+  if (n) return new Date(+n[1], +n[2]-1, +n[3], +n[4], +n[5]).getTime();
+  // 한국어 로케일: "2026. 5. 10. 오후 2:30:00"
+  const k = r.date.match(/(\d{4})\.\s*(\d+)\.\s*(\d+)\.\s*(오전|오후)\s*(\d+):(\d+)/);
+  if (k) {
+    let h = +k[5];
+    if (k[4] === '오후' && h < 12) h += 12;
+    if (k[4] === '오전' && h === 12) h = 0;
+    return new Date(+k[1], +k[2]-1, +k[3], h, +k[6]).getTime();
+  }
+  return 0;
+}
+
+function _fmtDate(d) {
+  if (!d) return '';
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(d)) return d;
+  const k = d.match(/(\d{4})\.\s*(\d+)\.\s*(\d+)\.\s*(오전|오후)\s*(\d+):(\d+)/);
+  if (!k) return d;
+  let h = +k[5];
+  if (k[4] === '오후' && h < 12) h += 12;
+  if (k[4] === '오전' && h === 12) h = 0;
+  const p = x => String(x).padStart(2, '0');
+  return `${k[1]}-${p(k[2])}-${p(k[3])} ${p(h)}:${p(k[6])}`;
+}
+
 function _applyHistUI(hist, name) {
-  const sorted = [...hist].sort((a, b) => Number(b.sessionId || 0) - Number(a.sessionId || 0));
+  const sorted = [...hist].sort((a, b) => _histTs(b) - _histTs(a));
   const myRec = name ? sorted.filter(r => r.name === name) : [];
   const myEl = document.getElementById('myHistoryList');
   const nameInfo = document.getElementById('myNameInfo');
@@ -1050,7 +1079,7 @@ function histCard(r) {
       <span class="history-score" style="color:${col}">${r.pct}점 (${r.grade})</span>
     </div>
     <div style="font-size:0.82rem;color:var(--muted);margin-top:4px">
-      ${r.correct}/${r.total} 정답 · ${r.categories || ''}<br>${r.date}
+      ${r.correct}/${r.total} 정답 · ${r.categories || ''}<br>${_fmtDate(r.date)}
     </div>
   </div>`;
 }
