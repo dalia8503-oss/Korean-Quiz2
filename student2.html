@@ -661,7 +661,7 @@ function showResult() {
 
   showScreen('screenResult');
   saveHistory(correct, total, pct, grade);
-  sendToSheet(correct, total, pct);
+  sendToSheet(correct, total, pct, grade);
 }
 
 // ══════════════════════════════════════════════
@@ -906,15 +906,29 @@ function saveHistory(correct, total, pct, grade) {
   localStorage.setItem(key, JSON.stringify(hist.slice(0, 200)));
 }
 
-function renderHistory() {
+async function renderHistory() {
   const key = 'quizHistory_v2';
-  const hist = JSON.parse(localStorage.getItem(key) || '[]');
   const name = localStorage.getItem('lastStudentName') || '';
+  const localHist = JSON.parse(localStorage.getItem(key) || '[]');
+  _applyHistUI(localHist, name);
 
-  const myRec = hist.filter(r => r.name === name);
+  if (!GOOGLE_SCRIPT_URL) return;
+  try {
+    const myEl = document.getElementById('myHistoryList');
+    if (!localHist.filter(r => r.name === name).length)
+      myEl.innerHTML = '<div class="empty-state">☁️ 기록 불러오는 중...</div>';
+    const res = await fetch(GOOGLE_SCRIPT_URL, { redirect: 'follow' });
+    const cloud = await res.json();
+    if (!Array.isArray(cloud)) return;
+    localStorage.setItem(key, JSON.stringify(cloud.slice(0, 200)));
+    _applyHistUI(cloud, name);
+  } catch(_) {}
+}
+
+function _applyHistUI(hist, name) {
+  const myRec = name ? hist.filter(r => r.name === name) : [];
   const myEl = document.getElementById('myHistoryList');
   const nameInfo = document.getElementById('myNameInfo');
-
   if (name) {
     nameInfo.style.display = 'block';
     nameInfo.innerHTML = `<b>${name}</b> 님의 기록 · 총 ${myRec.length}회`;
@@ -922,7 +936,6 @@ function renderHistory() {
   myEl.innerHTML = myRec.length
     ? myRec.map(r => histCard(r)).join('')
     : '<div class="empty-state"><div class="empty-icon">📭</div>기록이 없어요</div>';
-
   document.getElementById('allHistoryList').innerHTML = hist.length
     ? hist.map(r => histCard(r)).join('')
     : '<div class="empty-state"><div class="empty-icon">📭</div>기록이 없어요</div>';
@@ -970,14 +983,14 @@ function clearAllData() {
 // ══════════════════════════════════════════════
 // Google Sheets 전송 (선택)
 // ══════════════════════════════════════════════
-async function sendToSheet(correct, total, pct) {
+async function sendToSheet(correct, total, pct, grade) {
   if (!GOOGLE_SCRIPT_URL || !studentName) return;
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST', mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: studentName, empId, correct, total, pct,
+        name: studentName, empId, correct, total, pct, grade,
         categories: [...new Set(quizQuestions.map(q => q.category))].join(', '),
         date: new Date().toISOString()
       })
