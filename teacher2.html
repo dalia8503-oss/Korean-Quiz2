@@ -293,6 +293,34 @@
   </div>
 </div>
 
+<!-- 수정 요청 모달 -->
+<div class="modal-overlay" id="correctionModal">
+  <div class="modal-box" style="max-width:480px;">
+    <button class="modal-close" onclick="closeCorrectionModal()">✕</button>
+    <div style="font-weight:700;font-size:1.05rem;margin-bottom:14px;">✏️ 수정 요청</div>
+
+    <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:0.85rem;">
+      <div style="color:var(--muted);margin-bottom:4px;">신고된 문제</div>
+      <div id="corrModalQuestion" style="font-weight:600;margin-bottom:4px;"></div>
+      <div id="corrModalAnswer" style="color:var(--danger);font-size:0.82rem;"></div>
+    </div>
+
+    <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px;">올바른 정답 <span style="color:var(--danger)">*</span></label>
+    <input id="corrAnswerInput" type="text" placeholder="정확한 정답을 입력하세요"
+      style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;outline:none;margin-bottom:12px;box-sizing:border-box;font-family:inherit;">
+
+    <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px;">올바른 해설</label>
+    <textarea id="corrExplInput" placeholder="수정된 해설을 입력하세요 (선택)" rows="3"
+      style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;resize:none;margin-bottom:12px;font-family:inherit;box-sizing:border-box;outline:none;"></textarea>
+
+    <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px;">비고</label>
+    <textarea id="corrNoteInput" placeholder="추가 메모 (선택)" rows="2"
+      style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;resize:none;margin-bottom:14px;font-family:inherit;box-sizing:border-box;outline:none;"></textarea>
+
+    <button class="btn btn-primary" style="width:100%;" onclick="submitCorrection()">수정 요청 저장</button>
+  </div>
+</div>
+
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
 
@@ -446,25 +474,87 @@ function renderReports() {
   empty.style.display = 'none';
 
   list.innerHTML = reports.map(r => `
-    <div class="card" style="padding:14px 16px;border-left:4px solid ${r.resolved ? '#16a34a' : '#dc2626'};">
+    <div class="card" style="padding:14px 16px;border-left:4px solid ${r.correction ? '#2563eb' : r.resolved ? '#16a34a' : '#dc2626'};">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-        <span class="badge" style="background:${r.resolved ? '#dcfce7' : '#fee2e2'};color:${r.resolved ? '#16a34a' : '#dc2626'};">
-          ${r.resolved ? '✅ 확인 완료' : '🔴 미확인'}
-        </span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="badge" style="background:${r.resolved ? '#dcfce7' : '#fee2e2'};color:${r.resolved ? '#16a34a' : '#dc2626'};">
+            ${r.resolved ? '✅ 확인 완료' : '🔴 미확인'}
+          </span>
+          ${r.correction ? `<span class="badge" style="background:#dbeafe;color:#2563eb;">✏️ 수정 요청됨</span>` : ''}
+        </div>
         <span style="font-size:0.78rem;color:var(--muted)">${r.date}</span>
       </div>
       <div style="font-weight:700;margin-bottom:4px;font-size:0.9rem;">신고 유형: ${r.reasonLabel || r.reason}</div>
       <div style="font-size:0.85rem;margin-bottom:4px;"><b>문제:</b> ${r.question}</div>
-      <div style="font-size:0.85rem;margin-bottom:4px;"><b>정답:</b> ${r.answer} &nbsp;·&nbsp; <b>카테고리:</b> ${r.category || '-'}</div>
-      ${r.comment ? `<div style="font-size:0.85rem;background:#f8fafc;border-radius:6px;padding:6px 10px;margin-bottom:8px;"><b>의견:</b> ${r.comment}</div>` : ''}
+      <div style="font-size:0.85rem;margin-bottom:4px;"><b>기존 정답:</b> ${r.answer} &nbsp;·&nbsp; <b>카테고리:</b> ${r.category || '-'}</div>
+      ${r.comment ? `<div style="font-size:0.85rem;background:#f8fafc;border-radius:6px;padding:6px 10px;margin-bottom:8px;"><b>학생 의견:</b> ${r.comment}</div>` : ''}
+      ${r.correction ? `
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:0.85rem;">
+          <div style="font-weight:700;color:#2563eb;margin-bottom:6px;">✏️ 수정 요청 내용</div>
+          <div><b>올바른 정답:</b> ${r.correction.answer}</div>
+          ${r.correction.explanation ? `<div style="margin-top:4px;"><b>올바른 해설:</b> ${r.correction.explanation}</div>` : ''}
+          ${r.correction.note ? `<div style="margin-top:4px;color:var(--muted);"><b>비고:</b> ${r.correction.note}</div>` : ''}
+          <div style="margin-top:4px;font-size:0.78rem;color:var(--muted);">${r.correction.date}</div>
+        </div>` : ''}
       <div style="font-size:0.82rem;color:var(--muted);margin-bottom:10px;">신고자: ${r.reporter}</div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         ${!r.resolved
           ? `<button class="btn btn-sm" style="background:#dcfce7;color:#16a34a;" onclick="resolveReport('${r.id}')">✅ 확인 완료</button>`
           : `<button class="btn btn-sm btn-gray" onclick="unresolveReport('${r.id}')">↩ 미확인으로</button>`}
+        <button class="btn btn-sm" style="background:#eff6ff;color:#2563eb;" onclick="openCorrectionModal('${r.id}')">✏️ ${r.correction ? '수정 내용 변경' : '수정 요청'}</button>
         <button class="btn btn-sm btn-gray" onclick="deleteReport('${r.id}')">🗑 삭제</button>
       </div>
     </div>`).join('');
+}
+
+// 수정 요청 모달
+let _corrTargetId = null;
+
+function openCorrectionModal(id) {
+  const r = getReports().find(r => r.id === id);
+  if (!r) return;
+  _corrTargetId = id;
+  document.getElementById('corrModalQuestion').textContent = r.question;
+  document.getElementById('corrModalAnswer').textContent = '기존 정답: ' + r.answer;
+  document.getElementById('corrAnswerInput').value = r.correction?.answer || '';
+  document.getElementById('corrExplInput').value = r.correction?.explanation || '';
+  document.getElementById('corrNoteInput').value = r.correction?.note || '';
+  document.getElementById('correctionModal').classList.add('open');
+  setTimeout(() => document.getElementById('corrAnswerInput').focus(), 100);
+}
+
+function closeCorrectionModal() {
+  document.getElementById('correctionModal').classList.remove('open');
+  _corrTargetId = null;
+}
+
+async function submitCorrection() {
+  const answer = document.getElementById('corrAnswerInput').value.trim();
+  if (!answer) { alert('올바른 정답을 입력해주세요.'); return; }
+  const explanation = document.getElementById('corrExplInput').value.trim();
+  const note = document.getElementById('corrNoteInput').value.trim();
+  const correction = { answer, explanation, note, date: new Date().toLocaleString('ko-KR') };
+
+  const reports = getReports().map(r =>
+    r.id === _corrTargetId ? { ...r, correction, resolved: true } : r
+  );
+  saveReports(reports);
+  closeCorrectionModal();
+  renderReports();
+  updateReportBadge();
+  toast('수정 요청이 저장되었습니다.');
+
+  // GAS에도 전송
+  const r = reports.find(r => r.id === _corrTargetId);
+  if (GOOGLE_SCRIPT_URL && r) {
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'correction', reportId: r.id, question: r.question, ...correction })
+      });
+    } catch(_) {}
+  }
 }
 
 function resolveReport(id) {
