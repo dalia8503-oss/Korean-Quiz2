@@ -756,8 +756,7 @@ async function generateAISimilarQuestions() {
   showLoading('🤖 AI가 유사문제를 생성 중입니다...');
 
   const wrongListText = wrongAnswers.map((a, i) => {
-    const key = a.category_key;
-    return `${i+1}. [${a.category}]\n문제: ${a.question}\n정답: ${a.answer}\n해설: ${a.explanation}`;
+    return `${i+1}. [${a.category}] (category_key: ${a.category_key})\n문제: ${a.question}\n정답: ${a.answer}\n해설: ${a.explanation}`;
   }).join('\n\n');
 
   const catDesc = Object.entries(CAT_INSTRUCTION)
@@ -785,8 +784,10 @@ ${catDesc}
 - based_on 번호는 위 목록의 번호와 일치 (1번 문제면 3개 모두 based_on: 1)
 - 같은 based_on이라도 각 문제는 서로 다른 어휘/문장으로 구성
 
+중요: category_key는 반드시 위 틀린 문제 목록에 명시된 category_key를 그대로 사용하세요. (예: 조사 넣기 문제면 grammar_particle, 수사와 단위 명사 문제면 grammar_counter)
+
 반드시 JSON만 출력:
-{"generated": [{"based_on": 1, "category_key": "vocab_fill", "category": "빈칸에 알맞은 어휘 넣기", "question": "...", "choices": ["A","B","C","D"], "answer": "A", "explanation": "..."}]}`;
+{"generated": [{"based_on": 1, "category_key": "(해당 문제의 category_key 그대로)", "category": "(해당 카테고리 한국어 이름)", "question": "...", "choices": ["A","B","C","D"], "answer": "A", "explanation": "..."}]}`;
 
   try {
     const res = await fetch(
