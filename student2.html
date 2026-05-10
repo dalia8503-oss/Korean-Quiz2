@@ -194,6 +194,20 @@
   </div>
 </div>
 
+<!-- 초기화 비번 모달 -->
+<div class="modal-overlay" id="clearModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeClearModal()">✕</button>
+    <div class="modal-title">🔒 관리자 확인</div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:14px;">전체 초기화는 관리자만 가능합니다.<br>비밀번호를 입력하세요.</p>
+    <input type="password" id="clearPwInput" placeholder="비밀번호"
+      style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:8px;font-size:0.95rem;outline:none;margin-bottom:8px;box-sizing:border-box;font-family:inherit;"
+      onkeydown="if(event.key==='Enter')submitClearPw()">
+    <div id="clearPwError" style="display:none;color:var(--danger);font-size:0.83rem;margin-bottom:8px;">비밀번호가 틀렸습니다.</div>
+    <button class="btn btn-danger" style="width:100%;margin-top:4px;" onclick="submitClearPw()">🗑 전체 초기화 실행</button>
+  </div>
+</div>
+
 <!-- API 키 설정 모달 -->
 <div class="modal-overlay" id="keyModal">
   <div class="modal-box">
@@ -350,7 +364,7 @@
         <span style="font-weight:700;">전체 학생 기록</span>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV 다운로드</button>
-          <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑 전체 초기화</button>
+          <button class="btn btn-danger btn-sm" onclick="openClearModal()">🗑 전체 초기화</button>
         </div>
       </div>
     </div>
@@ -397,6 +411,45 @@ let questionCount = 10;
 let sessionId = null;
 
 // ══════════════════════════════════════════════
+// 초기화 비번 모달
+// SHA-256('global2026') — 교사 앱과 동일한 기본 비번
+const CLEAR_DEFAULT_PW_HASH = 'ae12bd8f5543f2f2d6844dfa694fdb5570687f347d36c95be20a8ff5efa9c263';
+
+async function _hashPw(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function openClearModal() {
+  document.getElementById('clearPwInput').value = '';
+  document.getElementById('clearPwError').style.display = 'none';
+  document.getElementById('clearPwInput').style.borderColor = '';
+  document.getElementById('clearModal').classList.add('open');
+  setTimeout(() => document.getElementById('clearPwInput').focus(), 100);
+}
+
+function closeClearModal() {
+  document.getElementById('clearModal').classList.remove('open');
+}
+
+async function submitClearPw() {
+  const pw = document.getElementById('clearPwInput').value;
+  const stored = localStorage.getItem('teacherPw2') || CLEAR_DEFAULT_PW_HASH;
+  const hashed = await _hashPw(pw);
+  if (hashed === stored) {
+    closeClearModal();
+    clearAllData();
+  } else {
+    document.getElementById('clearPwError').style.display = 'block';
+    document.getElementById('clearPwInput').value = '';
+    document.getElementById('clearPwInput').style.borderColor = 'var(--danger)';
+    setTimeout(() => {
+      document.getElementById('clearPwError').style.display = 'none';
+      document.getElementById('clearPwInput').style.borderColor = '';
+    }, 2500);
+  }
+}
+
 // 초기화
 // ══════════════════════════════════════════════
 // ══════════════════════════════════════════════
@@ -1004,10 +1057,11 @@ function exportCSV() {
 }
 
 function clearAllData() {
-  if (confirm('전체 학습 기록을 삭제할까요? 복구할 수 없습니다.')) {
-    localStorage.removeItem('quizHistory_v2');
-    renderHistory();
-  }
+  localStorage.removeItem('quizHistory_v2');
+  // renderHistory()를 호출하면 GAS 클라우드에서 데이터를 다시 받아와 복구되므로
+  // 직접 빈 배열로 UI를 갱신한다.
+  const name = localStorage.getItem('lastStudentName') || '';
+  _applyHistUI([], name);
 }
 
 // ══════════════════════════════════════════════
