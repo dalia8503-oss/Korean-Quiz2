@@ -756,8 +756,7 @@ async function generateAISimilarQuestions() {
   showLoading('🤖 AI가 유사문제를 생성 중입니다...');
 
   const wrongListText = wrongAnswers.map((a, i) => {
-    const key = a.category_key;
-    return `${i+1}. [${a.category}]\n문제: ${a.question}\n정답: ${a.answer}\n해설: ${a.explanation}`;
+    return `${i+1}. [${a.category}] (category_key: ${a.category_key})\n문제: ${a.question}\n정답: ${a.answer}\n해설: ${a.explanation}`;
   }).join('\n\n');
 
   const catDesc = Object.entries(CAT_INSTRUCTION)
@@ -785,8 +784,10 @@ ${catDesc}
 - based_on 번호는 위 목록의 번호와 일치 (1번 문제면 3개 모두 based_on: 1)
 - 같은 based_on이라도 각 문제는 서로 다른 어휘/문장으로 구성
 
+중요: category_key는 반드시 위 틀린 문제 목록에 명시된 category_key를 그대로 사용하세요. (예: 조사 넣기 문제면 grammar_particle, 수사와 단위 명사 문제면 grammar_counter)
+
 반드시 JSON만 출력:
-{"generated": [{"based_on": 1, "category_key": "vocab_fill", "category": "빈칸에 알맞은 어휘 넣기", "question": "...", "choices": ["A","B","C","D"], "answer": "A", "explanation": "..."}]}`;
+{"generated": [{"based_on": 1, "category_key": "(해당 문제의 category_key 그대로)", "category": "(해당 카테고리 한국어 이름)", "question": "...", "choices": ["A","B","C","D"], "answer": "A", "explanation": "..."}]}`;
 
   try {
     const res = await fetch(
@@ -1019,8 +1020,37 @@ async function refreshFromCloud() {
   if (btn) { btn.textContent = '☁️ 클라우드 불러오기'; btn.disabled = false; }
 }
 
+function _histTs(r) {
+  if (r.sessionId) return Number(r.sessionId);
+  if (!r.date) return 0;
+  // 새 형식: "2026-05-10 14:30"
+  const n = r.date.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+  if (n) return new Date(+n[1], +n[2]-1, +n[3], +n[4], +n[5]).getTime();
+  // 한국어 로케일: "2026. 5. 10. 오후 2:30:00"
+  const k = r.date.match(/(\d{4})\.\s*(\d+)\.\s*(\d+)\.\s*(오전|오후)\s*(\d+):(\d+)/);
+  if (k) {
+    let h = +k[5];
+    if (k[4] === '오후' && h < 12) h += 12;
+    if (k[4] === '오전' && h === 12) h = 0;
+    return new Date(+k[1], +k[2]-1, +k[3], h, +k[6]).getTime();
+  }
+  return 0;
+}
+
+function _fmtDate(d) {
+  if (!d) return '';
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(d)) return d;
+  const k = d.match(/(\d{4})\.\s*(\d+)\.\s*(\d+)\.\s*(오전|오후)\s*(\d+):(\d+)/);
+  if (!k) return d;
+  let h = +k[5];
+  if (k[4] === '오후' && h < 12) h += 12;
+  if (k[4] === '오전' && h === 12) h = 0;
+  const p = x => String(x).padStart(2, '0');
+  return `${k[1]}-${p(k[2])}-${p(k[3])} ${p(h)}:${p(k[6])}`;
+}
+
 function _applyHistUI(hist, name) {
-  const sorted = [...hist].sort((a, b) => Number(b.sessionId || 0) - Number(a.sessionId || 0));
+  const sorted = [...hist].sort((a, b) => _histTs(b) - _histTs(a));
   const myRec = name ? sorted.filter(r => r.name === name) : [];
   const myEl = document.getElementById('myHistoryList');
   const nameInfo = document.getElementById('myNameInfo');
@@ -1049,7 +1079,7 @@ function histCard(r) {
       <span class="history-score" style="color:${col}">${r.pct}점 (${r.grade})</span>
     </div>
     <div style="font-size:0.82rem;color:var(--muted);margin-top:4px">
-      ${r.correct}/${r.total} 정답 · ${r.categories || ''}<br>${r.date}
+      ${r.correct}/${r.total} 정답 · ${r.categories || ''}<br>${_fmtDate(r.date)}
     </div>
   </div>`;
 }
