@@ -179,6 +179,18 @@
   <div class="tab-content" id="tab-students">
     <div class="filter-row">
       <input class="search-input" id="stuSearch" placeholder="이름 또는 사번 검색..." oninput="renderStudents()">
+      <select id="stuTeam" onchange="renderStudents()">
+        <option value="">전체 팀</option>
+        <option value="LNG선공사팀">LNG선공사팀</option>
+        <option value="기타">기타(팀)</option>
+      </select>
+      <select id="stuDept" onchange="renderStudents()">
+        <option value="">전체 부/과</option>
+        <option value="1부5과">1부5과</option>
+        <option value="2부3과">2부3과</option>
+        <option value="3부의장과">3부의장과</option>
+        <option value="기타">기타(과)</option>
+      </select>
       <select id="stuGrade" onchange="renderStudents()">
         <option value="">전체 등급</option>
         <option value="A">A등급</option>
@@ -189,7 +201,7 @@
       <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV</button>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>이름</th><th>사번</th><th>점수</th><th>정답</th><th>카테고리</th><th>등급</th><th>일시</th></tr></thead>
+      <thead><tr><th>이름</th><th>사번</th><th>팀</th><th>부/과</th><th>점수</th><th>정답</th><th>카테고리</th><th>등급</th><th>일시</th></tr></thead>
       <tbody id="stuBody"></tbody>
     </table></div>
     <div id="stuEmpty" class="empty" style="display:none;"><div class="empty-icon">📭</div>기록이 없습니다</div>
@@ -543,9 +555,13 @@ function renderStudents() {
   const hist = getHist();
   const q = document.getElementById('stuSearch').value.toLowerCase();
   const g = document.getElementById('stuGrade').value;
+  const t = document.getElementById('stuTeam').value;
+  const d = document.getElementById('stuDept').value;
   const filtered = hist.filter(r =>
     (!q || r.name.toLowerCase().includes(q) || (r.empId||'').includes(q)) &&
-    (!g || r.grade === g)
+    (!g || r.grade === g) &&
+    (!t || r.team === t) &&
+    (!d || r.dept === d)
   );
 
   const empty = document.getElementById('stuEmpty');
@@ -561,6 +577,8 @@ function renderStudents() {
   tbody.innerHTML = filtered.map(r => `<tr>
     <td><b>${r.name}</b></td>
     <td style="color:var(--muted)">${r.empId||''}</td>
+    <td style="font-size:0.8rem">${r.team||'-'}</td>
+    <td style="font-size:0.8rem">${r.dept||'-'}</td>
     <td style="color:${col(r.pct)};font-weight:700">${r.pct}점</td>
     <td>${r.correct}/${r.total}</td>
     <td style="font-size:0.78rem;color:var(--muted)">${(r.categories||'').replace(/빈칸에 알맞은 어휘 넣기/g,'📝').replace(/잘못 사용한 어휘 찾기/g,'🔍').replace(/비슷한 의미의 문장 고르기/g,'💬').replace(/적절한 문법 표현 넣기/g,'📐').replace(/문장 연결하기/g,'🔗')}</td>
@@ -672,8 +690,8 @@ function renderQuestions() {
 function exportCSV() {
   const hist = getHist();
   if (!hist.length) { toast('내보낼 데이터가 없습니다.'); return; }
-  const rows = [['이름','사번','점수','정답/총문제','등급','카테고리','날짜']];
-  hist.forEach(r => rows.push([r.name, r.empId||'', r.pct+'%', `${r.correct}/${r.total}`, r.grade, r.categories||'', r.date]));
+  const rows = [['이름','사번','팀','부/과','점수','정답/총문제','등급','카테고리','날짜']];
+  hist.forEach(r => rows.push([r.name, r.empId||'', r.team||'', r.dept||'', r.pct+'%', `${r.correct}/${r.total}`, r.grade, r.categories||'', r.date]));
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8;' });
   const a = document.createElement('a');

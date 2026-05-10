@@ -240,6 +240,22 @@
       <input type="text" id="inputEmpId" placeholder="사번 (숫자 6자리)" maxlength="6" inputmode="numeric" style="flex:1;margin-bottom:0;">
     </div>
 
+    <h3>🏢 소속</h3>
+    <div style="display:flex;gap:10px;margin-bottom:14px;">
+      <select id="inputTeam" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.95rem;background:#fff;">
+        <option value="">팀 선택</option>
+        <option value="LNG선공사팀">LNG선공사팀</option>
+        <option value="기타">기타</option>
+      </select>
+      <select id="inputDept" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.95rem;background:#fff;">
+        <option value="">부/과 선택</option>
+        <option value="1부5과">1부5과</option>
+        <option value="2부3과">2부3과</option>
+        <option value="3부의장과">3부의장과</option>
+        <option value="기타">기타</option>
+      </select>
+    </div>
+
     <h3>📂 카테고리 선택 <span style="font-weight:400;font-size:0.8rem;color:var(--muted)">(복수 선택 가능)</span></h3>
     <div class="cat-group" id="categoryGroup"></div>
 
@@ -254,7 +270,7 @@
     <button class="btn btn-primary" onclick="startQuiz()" style="margin-top:8px;">▶ 퀴즈 시작하기</button>
     <button class="btn btn-outline" onclick="showScreen('screenHistory')">📊 학습 이력 보기</button>
   </div>
-  <p style="text-align:center;font-size:0.8rem;color:var(--muted);">⚠️ 학습 데이터는 이 기기의 브라우저에만 저장됩니다</p>
+  <p style="text-align:center;font-size:0.8rem;color:var(--muted);">☁️ 학습 데이터는 클라우드와 이 기기에 함께 저장됩니다</p>
 </div>
 
 <!-- ══════════════════ 화면 2: 퀴즈 ══════════════════ -->
@@ -373,6 +389,8 @@ let wrongPool = [];       // 오답 복습용 임시 보관
 let currentIdx = 0;
 let studentName = '';
 let empId = '';
+let team = '';
+let dept = '';
 let answers = [];
 let selectedCategories = Object.keys(CAT_INFO);
 let questionCount = 10;
@@ -497,8 +515,12 @@ function setupCountGroup() {
 function restoreLastName() {
   const n = localStorage.getItem('lastStudentName');
   const e = localStorage.getItem('lastEmpId');
+  const t = localStorage.getItem('lastTeam');
+  const d = localStorage.getItem('lastDept');
   if (n) document.getElementById('inputName').value = n;
   if (e) document.getElementById('inputEmpId').value = e;
+  if (t) document.getElementById('inputTeam').value = t;
+  if (d) document.getElementById('inputDept').value = d;
 }
 
 // ══════════════════════════════════════════════
@@ -507,9 +529,13 @@ function restoreLastName() {
 function startQuiz(pool = null) {
   studentName = document.getElementById('inputName').value.trim();
   empId = document.getElementById('inputEmpId').value.trim();
+  team = document.getElementById('inputTeam').value;
+  dept = document.getElementById('inputDept').value;
   if (!studentName) { alert('이름을 입력해주세요!'); return; }
   localStorage.setItem('lastStudentName', studentName);
   localStorage.setItem('lastEmpId', empId);
+  localStorage.setItem('lastTeam', team);
+  localStorage.setItem('lastDept', dept);
 
   if (pool) {
     quizQuestions = pool.sort(() => Math.random() - 0.5);
@@ -895,7 +921,7 @@ function hideLoading() { document.getElementById('loadingOverlay').style.display
 // ══════════════════════════════════════════════
 function saveHistory(correct, total, pct, grade) {
   const rec = {
-    sessionId, name: studentName, empId,
+    sessionId, name: studentName, empId, team, dept,
     correct, total, pct, grade,
     categories: [...new Set(quizQuestions.map(q => q.category))].join(', '),
     date: new Date().toLocaleString('ko-KR')
@@ -943,9 +969,13 @@ function _applyHistUI(hist, name) {
 
 function histCard(r) {
   const col = r.pct >= 70 ? 'var(--success)' : r.pct >= 50 ? 'var(--warning)' : 'var(--danger)';
+  const affil = [r.team, r.dept].filter(Boolean).join(' · ');
   return `<div class="history-card">
     <div class="history-meta">
-      <div><b>${r.name}</b><span style="color:var(--muted);font-size:0.85rem;margin-left:6px">${r.empId || ''}</span></div>
+      <div>
+        <b>${r.name}</b><span style="color:var(--muted);font-size:0.85rem;margin-left:6px">${r.empId || ''}</span>
+        ${affil ? `<span style="font-size:0.78rem;color:var(--muted);margin-left:6px">🏢 ${affil}</span>` : ''}
+      </div>
       <span class="history-score" style="color:${col}">${r.pct}점 (${r.grade})</span>
     </div>
     <div style="font-size:0.82rem;color:var(--muted);margin-top:4px">
@@ -990,7 +1020,7 @@ async function sendToSheet(correct, total, pct, grade) {
       method: 'POST', mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: studentName, empId, correct, total, pct, grade,
+        name: studentName, empId, team, dept, correct, total, pct, grade,
         categories: [...new Set(quizQuestions.map(q => q.category))].join(', '),
         date: new Date().toISOString()
       })
